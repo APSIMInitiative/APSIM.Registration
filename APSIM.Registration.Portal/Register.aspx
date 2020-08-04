@@ -24,7 +24,7 @@
             <asp:TableCell ID="TableCell1" runat="server">Product to download:</asp:TableCell>
             <asp:TableCell ID="TableCell2" runat="server"><asp:DropDownList ID="Product" runat="server" Width="200px"/></asp:TableCell>
          </asp:TableRow>
-         <asp:TableRow runat="server">
+         <asp:TableRow runat="server" ID="versionRow">
             <asp:TableCell ID="VersionLabel" Text="Version:" runat="server"> </asp:TableCell>
             <asp:TableCell runat="server"><asp:DropDownList ID="Version" runat="server" Width="200px"></asp:DropDownList></asp:TableCell>
          </asp:TableRow>

@@ -272,7 +272,7 @@ namespace ProductRegistration
         private string GetProductName()
         {
             string ProductName = Product.Text;
-            if (Version.Visible)
+            if (ProductName.Contains("APSIM"))
                 ProductName += Version.Text;
             return ProductName;
         }
@@ -400,17 +400,19 @@ namespace ProductRegistration
                 return WebUtilities.CallRESTService<string>(url);
             }
             ProductName = ProductName.Replace("?", "");
-            foreach (string SubDirectory in Directory.GetDirectories(DownloadDirectory))
-            {
-                foreach (string FileName in Directory.GetFiles(SubDirectory, "*.exe"))
+
+            if (Directory.Exists(DownloadDirectory))
+                foreach (string SubDirectory in Directory.GetDirectories(DownloadDirectory))
                 {
-                    if (FileName.ToLower().Contains(ProductName.ToLower()))
+                    foreach (string FileName in Directory.GetFiles(SubDirectory, "*.exe"))
                     {
-                        string URL = FileName.Replace(DownloadDirectory, OurURL + "Downloads");
-                        return URL.Replace("\\", "/");
+                        if (FileName.ToLower().Contains(ProductName.ToLower()))
+                        {
+                            string URL = FileName.Replace(DownloadDirectory, OurURL + "Downloads");
+                            return URL.Replace("\\", "/");
+                        }
                     }
                 }
-            }
             throw new Exception("Cannot find product name : " + ProductName);
         }
 

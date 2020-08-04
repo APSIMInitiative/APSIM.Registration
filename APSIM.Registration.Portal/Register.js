@@ -1,7 +1,7 @@
 ﻿$(document).ready(function () {
     $('#radioCom').change(onLicenseTypeChanged);
     $('#radioNonCom').change(onLicenseTypeChanged);
-    $('#Product').change(updateLicense);
+    $('#Product').change(onProductChanged);
     onLicenseTypeChanged();
     updateLicense();
 });
@@ -19,6 +19,19 @@ function onLicenseTypeChanged() {
         });
     }
     updateLicense();
+}
+
+function onProductChanged() {
+    // User has changed the selected product. Need to update license
+    // info and hide the row containing version selection if apsoil
+    // is selected.
+    updateLicense();
+    var product = $('#Product').find('option:selected').text();
+    if (product == 'APSIM') {
+        $('#versionRow').show();
+    } else {
+        $('#versionRow').hide();
+    }
 }
 
 function updateLicense() {

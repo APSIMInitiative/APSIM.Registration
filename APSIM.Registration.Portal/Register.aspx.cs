@@ -113,21 +113,34 @@ namespace ProductRegistration
         {
             try
             {
-                string url = "https://apsimdev.apsim.info/APSIM.Registration.Service/Registration.svc/AddRegistration" +
-                                "?firstName=" + FirstName.Text +
-                                "&lastName=" + LastName.Text +
-                                "&organisation=" + Organisation.Text +
-                                "&country=" + Country.Text +
-                                "&email=" + Email.Text +
-                                "&product=" + GetRealProductName() +
-                                "&version=" + GetVersion() +
-                                "&platform=" + GetPlatform() +
-                                "&type=Registration";
+                StringBuilder url = new StringBuilder();
+                url.Append("https://apsimdev.apsim.info/APSIM.Registration.Service/Registration.svc/");
+                if (radioCom.Checked)
+                    url.Append("AddCommercialRegistration");
+                else
+                    url.Append("AddRegistration");
+                url.Append($"?firstName={FirstName.Text}");
+                url.Append($"&lastName={LastName.Text}");
+                url.Append($"&organisation={Organisation.Text}");
+                url.Append($"&country={Country.Text}");
+                url.Append($"&email={Email.Text}");
+                url.Append($"&product={GetRealProductName()}");
+                url.Append($"&version={GetVersion()}");
+                url.Append($"&platform={GetPlatform()}");
+                url.Append($"&type=Registration");
+                if (radioCom.Checked)
+                {
+                    url.Append($"&licensorName={LicensorName.Text}");
+                    url.Append($"&licensorEmail={LicensorEmail.Text}");
+                    url.Append($"&companyTurnover={GetContractorTurnover()}");
+                    url.Append($"&companyRego={companyID.Text}");
+                    url.Append($"&companyAddress={companyAddress.Text}");
+                }
 
-                WriteToLogFile("Updating DB. Request: " + url, MessageType.Info);
+                WriteToLogFile($"Updating DB. Request: {url}", MessageType.Info);
                 try
                 {
-                    WebUtilities.CallRESTService<object>(url);
+                    WebUtilities.CallRESTService<object>(url.ToString());
                     WriteToLogFile("DB updated successfully.", MessageType.Info);
                 }
                 catch (Exception error)
@@ -138,11 +151,11 @@ namespace ProductRegistration
                 // Subscribe if subscribe checkbox is checked.
                 if (ChkSubscribe.Checked)
                 {
-                    url = $"https://apsimdev.apsim.info/APSIM.Registration.Service/Registration.svc/Subscribe?email={Email.Text}";
-                    WriteToLogFile("Subscribing to mailing list. Request: " + url, MessageType.Info);
+                    string request = $"https://apsimdev.apsim.info/APSIM.Registration.Service/Registration.svc/Subscribe?email={Email.Text}";
+                    WriteToLogFile("Subscribing to mailing list. Request: " + request, MessageType.Info);
                     try
                     {
-                        WebUtilities.CallRESTService<object>(url);
+                        WebUtilities.CallRESTService<object>(request);
                         WriteToLogFile("Subscribed to mailing list", MessageType.Info);
                     }
                     catch (Exception err)

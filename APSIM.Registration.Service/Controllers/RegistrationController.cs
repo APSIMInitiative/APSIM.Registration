@@ -204,8 +204,8 @@ namespace APSIM.Registration.Service.Controllers
                 registration.Version = version;
                 registration.Platform = platform;
                 registration.Type = type;
-                registration.LicencorName = licensorName;
-                registration.LicencorEmail = licensorEmail;
+                registration.LicensorName = licensorName;
+                registration.LicensorEmail = licensorEmail;
                 registration.CompanyTurnover = companyTurnover;
                 registration.CompanyRego = companyRego;
                 registration.CompanyAddress = companyAddress;

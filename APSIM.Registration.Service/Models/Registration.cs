@@ -40,8 +40,8 @@ namespace APSIM.Registration.Service.Models
         [Required]
         public string LicenceType { get; set; }
 
-        public string LicencorName { get; set; }
-        public string LicencorEmail { get; set; }
+        public string LicensorName { get; set; }
+        public string LicensorEmail { get; set; }
         public string CompanyTurnover { get; set; }
         public string CompanyRego { get; set; }
         public string CompanyAddress { get; set; }

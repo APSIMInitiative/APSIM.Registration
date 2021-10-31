@@ -11,7 +11,7 @@ using APSIM.Registration.Service.Data;
 namespace APSIM.Registration.Service.Controllers
 {
     [ApiController]
-    [Route("api/registration")]
+    [Route("api")]
     public class RegistrationController : ControllerBase
     {
         private const string registrationType = "Registration";
@@ -32,8 +32,8 @@ namespace APSIM.Registration.Service.Controllers
         /// Add a new registration to the registrations DB.
         /// </summary>
         /// <param name="registration">Registration details.</param>
-        [HttpPost("add")]
-        public ActionResult Add(Models.Registration registration)
+        [HttpPost("register")]
+        public ActionResult Register(Models.Registration registration)
         {
             try
             {
@@ -47,174 +47,6 @@ namespace APSIM.Registration.Service.Controllers
             catch (Exception error)
             {
                 return HandleError(error);
-            }
-        }
-
-        /// <summary>
-        /// Add a registration into the database.
-        /// </summary>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="organisation"></param>
-        /// <param name="address1"></param>
-        /// <param name="address2"></param>
-        /// <param name="city"></param>
-        /// <param name="state"></param>
-        /// <param name="postcode"></param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        [HttpGet("add")]
-        public ActionResult Add(string firstName, string lastName, string organisation, string address1, string address2,
-                    string city, string state, string postcode, string country, string email, string product)
-        {
-            try
-            {
-                var registration = new Models.Registration();
-                registration.FirstName = firstName;
-                registration.LastName = lastName;
-                registration.Organisation = organisation;
-                registration.Country = country;
-                registration.Email = email;
-                registration.Product = product;
-                registration.Version = "1";
-                registration.Platform = "Windows";
-                registration.Type = registrationType;
-                registration.LicenceType = nonCommercialLicenceName;
-
-                return Add(registration);
-            }
-            catch (Exception error)
-            {
-                return HandleError(error);
-            }
-        }
-
-        /// <summary>
-        /// Add a upgrade registration into the database.
-        /// </summary>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="organisation"></param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        [HttpGet("addnew")]
-        public ActionResult AddNew(string firstName, string lastName, string organisation, string country, string email, string product)
-        {
-            try
-            {
-                var registration = new Models.Registration();
-                registration.FirstName = firstName;
-                registration.LastName = lastName;
-                registration.Organisation = organisation;
-                registration.Country = country;
-                registration.Email = email;
-                registration.Product = product;
-                registration.Version = "1"; // To mimic the old behaviour
-                registration.Platform = "Windows";
-                registration.Type = registrationType;
-                registration.LicenceType = nonCommercialLicenceName;
-
-                return Add(registration);
-            }
-            catch (Exception error)
-            {
-                return HandleError(error);
-            }
-        }
-
-        /// <summary>
-        /// Add a upgrade or registration into the database.
-        /// </summary>
-        /// <remarks>
-        /// Called by the APSIM Upgrade GUI.
-        /// </remarks>
-        /// <param name="firstName">First name of the registrant.</param>
-        /// <param name="lastName">Last name of the registrant.</param>
-        /// <param name="organisation">Organisation of the registrant.</param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        /// <param name="version"></param>
-        /// <param name="platform"></param>
-        /// <param name="type"></param>
-        [HttpGet("addregistration")]
-        public ActionResult AddRegistration(string firstName, string lastName, string organisation, string country, string email, string product, string version, string platform, string type)
-        {
-            try
-            {
-                var registration = new Models.Registration();
-                registration.FirstName = firstName;
-                registration.LastName = lastName;
-                registration.Organisation = organisation;
-                registration.Country = country;
-                registration.Email = email;
-                registration.Product = product;
-                registration.Version = version;
-                registration.Platform = platform;
-                registration.Type = type;
-                registration.LicenceType = nonCommercialLicenceName;
-                try
-                {
-                    registration.LicenceType = IsCommercialUser(email) ? commercialLicenceName : nonCommercialLicenceName;
-                }
-                catch (Exception err)
-                {
-                    logger.LogError(err, $"Failed to check if {email} belongs to a commercial user");
-                }
-
-                return Add(registration);
-            }
-            catch (Exception error)
-            {
-                return HandleError(error);
-            }
-        }
-
-        /// <summary>
-        /// Adds a registration for a commercial user.
-        /// </summary>
-        /// <param name="firstName"></param>
-        /// <param name="lastName"></param>
-        /// <param name="organisation"></param>
-        /// <param name="country"></param>
-        /// <param name="email"></param>
-        /// <param name="product"></param>
-        /// <param name="version"></param>
-        /// <param name="platform"></param>
-        /// <param name="type"></param>
-        /// <param name="licensorName"></param>
-        /// <param name="licensorEmail"></param>
-        /// <param name="companyTurnover"></param>
-        /// <param name="companyRego"></param>
-        /// <param name="companyAddress"></param>
-        [HttpGet("addcommercialregistration")]
-        public ActionResult AddCommercialRegistration(string firstName, string lastName, string organisation, string country, string email, string product, string version, string platform, string type, string licensorName, string licensorEmail, string companyTurnover, string companyRego, string companyAddress)
-        {
-            try
-            {
-                var registration = new Models.Registration();
-                registration.FirstName = firstName;
-                registration.LastName = lastName;
-                registration.Organisation = organisation;
-                registration.Country = country;
-                registration.Email = email;
-                registration.Product = product;
-                registration.Version = version;
-                registration.Platform = platform;
-                registration.Type = type;
-                registration.LicensorName = licensorName;
-                registration.LicensorEmail = licensorEmail;
-                registration.CompanyTurnover = companyTurnover;
-                registration.CompanyRego = companyRego;
-                registration.CompanyAddress = companyAddress;
-
-                return Add(registration);
-            }
-            catch (Exception err)
-            {
-                return HandleError(err);
             }
         }
 

@@ -23,6 +23,7 @@ namespace APSIM.Registration.Service.Models
         public string Country { get; set; }
 
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
 
         [Required]
@@ -38,7 +39,7 @@ namespace APSIM.Registration.Service.Models
         public string Type { get; set; }
 
         [Required]
-        public string LicenceType { get; set; }
+        public LicenceType LicenceType { get; set; }
 
         public string LicensorName { get; set; }
         public string LicensorEmail { get; set; }

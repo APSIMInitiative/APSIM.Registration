@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using APSIM.Registration.Service.Data;
 using Microsoft.EntityFrameworkCore;
+using APSIM.Registration.Service.Controllers;
 
 namespace APSIM.Registration.Service
 {
@@ -29,8 +30,12 @@ namespace APSIM.Registration.Service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<RegistrationsDbContextGenerator>();
-            // services.AddDbContext<RegistrationsDbContext>();
+            services.AddSingleton<RegistrationController>();
+            services.AddSingleton<IDbContextGenerator<RegistrationsDbContext>>(s => new RegistrationsDbContextGenerator());
+
             services.AddControllers();
+            services.AddRazorPages();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "APSIM.Registration.Service", Version = "v1" });
@@ -48,13 +53,14 @@ namespace APSIM.Registration.Service
             }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapRazorPages();
                 endpoints.MapControllers();
             });
         }

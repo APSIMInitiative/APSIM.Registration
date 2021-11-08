@@ -14,10 +14,6 @@ namespace APSIM.Registration.Service.Controllers
     [Route("api")]
     public class RegistrationController : ControllerBase
     {
-        private const string registrationType = "Registration";
-
-        private const string commercialLicenceName = "Commercial";
-        private const string nonCommercialLicenceName = "Non-Commercial";
         private readonly ILogger<RegistrationController> logger;
 
         private readonly RegistrationsDbContextGenerator dbContextGenerator;
@@ -60,7 +56,11 @@ namespace APSIM.Registration.Service.Controllers
         {
             try
             {
-                throw new NotImplementedException();
+                using (IRegistrationsDbContext context = dbContextGenerator.Generate())
+                {
+                    Func<Models.Registration, bool> isMatch = r => r.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase);
+                    return context.Registrations.Any(isMatch);
+                }
             }
             catch (Exception error)
             {
@@ -121,7 +121,7 @@ namespace APSIM.Registration.Service.Controllers
         {
             Func<string, string, bool> areEqual = (s1, s2) => s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase);
             using (IRegistrationsDbContext context = dbContextGenerator.Generate())
-                return context.Registrations.Where(r => areEqual(r.Email, email)).Any(r => areEqual(r.LicenceType, commercialLicenceName));
+                return context.Registrations.Any(r => areEqual(r.Email, email) && r.LicenceType == LicenceType.Commercial);
         }
 
         /// <summary>

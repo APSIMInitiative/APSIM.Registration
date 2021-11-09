@@ -29,6 +29,33 @@
         <form method="post">
             <table>
                 <tr>
+                    <td class="property-name-cell">Product:</td>
+                    <td class="table-input-cell">
+                        @* <input type="text" asp-for="RegistrationDetails.Product"> *@
+                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@Model.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Product"></span></td>
+                </tr>
+                <tr id="versionRow">
+                    @* <td class="property-name-cell">Version:</td> *@
+                    <td class="table-input-cell">
+                        <input type="hidden" asp-for="RegistrationDetails.Version">
+                        @* <select id="version-selector" asp-for="RegistrationDetails.Version"> *@
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Version"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Platform:</td>
+                    <td class="table-input-cell">
+                        <select id="platform-selector" asp-for="RegistrationDetails.Platform">
+                            <option id="platformWindows" value="Windows">Windows</option>
+                            <option id="platformMacOS" value="MacOS">MacOS</option>
+                            <option id="platformLinux" value="Linux">Linux</option>
+                        </select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Platform"></span></td>
+                </tr>
+                <tr>
                     <td class="property-name-cell">First Name:</td>
                     <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.FirstName"></td>
                     <td><span class="error" asp-validation-for="RegistrationDetails.FirstName"></span></td>
@@ -45,28 +72,15 @@
                 </tr>
                 <tr>
                     <td class="property-name-cell">Country:</td>
-                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Country"></td>
+                    <td class="table-input-cell">
+                        <select asp-for="RegistrationDetails.Country" asp-items="@ISO3166.Country.List.Select(c => new SelectListItem(c.Name, c.Name))"></select>
+                    </td>
                     <td><span class="error" asp-validation-for="RegistrationDetails.Country"></span></td>
                 </tr>
                 <tr>
                     <td class="property-name-cell">Email:</td>
                     <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Email"></td>
                     <td><span asp-validation-for="RegistrationDetails.Email"></span></td>
-                </tr>
-                <tr>
-                    <td class="property-name-cell">Product:</td>
-                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Product"></td>
-                    <td><span class="error" asp-validation-for="RegistrationDetails.Product"></span></td>
-                </tr>
-                <tr>
-                    <td class="property-name-cell">Version:</td>
-                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Version"></td>
-                    <td><span class="error" asp-validation-for="RegistrationDetails.Version"></span></td>
-                </tr>
-                <tr>
-                    <td class="property-name-cell">Platform:</td>
-                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Platform"></td>
-                    <td><span class="error" asp-validation-for="RegistrationDetails.Platform"></span></td>
                 </tr>
                 <tr>
                     <td class="property-name-cell">Licence Type:</td>
@@ -103,11 +117,55 @@
             </table>
             <input type="submit" value="Submit" asp-page-handler="Register">
         </form>
+        <iframe id="terms" height="300px" width="700px" />
     </fieldset>
 }
 @if (Model.ShowDownloads)
 {
     <h1>APSIM Downloads</h1>
+    <p>
+        Product: 
+        @Html.DropDownList("product-selector", Model.Products.Select(p => new SelectListItem(p.Name, p.Name)))
+        <!-- Downloads Table -->
+        <table id="tblDownloads">
+            <tr>
+                <th>Release Date</th>
+                <th>Release Number</th>
+                <th>Release Information</th>
+                <th>Download Link</th>
+            </tr>
+            @foreach (Product product in Model.Products)
+            {
+                foreach (ProductVersion version in product.GetVersions(Model.NumDownloads))
+                {
+                    <tr class="@product.Name">
+                        <td>@version.ReleaseDate.ToString("yyyy-MM-dd")</td>
+                        <td>@version.Number</td>
+                        <td><a href="@version.InfoLink">@version.Description</a></td>
+                        <td>
+                            <a href="@version.DownloadLinkWindows">Windows</a>
+                            @if (!string.IsNullOrEmpty(version.DownloadLinkMac))
+                            {
+                                @:,&nbsp;
+                                <a href="@version.DownloadLinkMac">MacOS</a>
+                            }
+                            @if (!string.IsNullOrEmpty(version.DownloadLinkLinux))
+                            {
+                                @:,&nbsp;
+                                <a href="@version.DownloadLinkLinux">Linux</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+        <!--
+            todo: need to figure out autopostback equivalent.
+            Until then, I'm removing the 'number of rows' option.
+
+            Max number of rows:&nbsp;<input asp-for="NumDownloads">
+        -->
+    </p>
 }
 </body>
 </html>

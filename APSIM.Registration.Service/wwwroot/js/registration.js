@@ -1,8 +1,17 @@
+const productSelectorSelector = '#product-selector';
+const apsimName = "APSIM Next Generation";
+const oldApsimName = "APSIM Classic";
+const apsoilName = "Apsoil";
+const commercialLicenceName = "Commercial";
+const nonCommercialLicenceName = "Non-Commercial";
+
 $(document).ready(function () {
     $('#dropDownLicenseType').change(onLicenseTypeChanged);
     $('#Product').change(onProductChanged);
+    $(productSelectorSelector).change(onDownloadProductChanged);
     onLicenseTypeChanged();
     updateLicense();
+    onDownloadProductChanged();
 });
 
 function onLicenseTypeChanged() {
@@ -23,24 +32,42 @@ function onLicenseTypeChanged() {
     }
 }
 
+function onDownloadProductChanged() {
+    var product = $(productSelectorSelector).find('option:selected').text();
+    $('#tblDownloads tr').each(function() {
+        if (this.className == product) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+    $('#tblDownloads tr:first').show();
+}
+
+
+// This is called when the user changes the selected product on the
+// registration page.
 function onProductChanged() {
-    // User has changed the selected product. Need to update license
-    // info and hide the row containing version selection if apsoil
-    // is selected.
+    // Need to update license info and hide the row containing version
+    // selection if apsoil is selected.
     updateLicense();
     var product = $('#Product').find('option:selected').text();
-    if (product == 'APSIM') {
-        $('#versionRow').show();
+    if (product == apsimName) {
+        $('#platformLinux').show();
+        $('#platformMacOS').show();
     } else {
-        $('#versionRow').hide();
+        $('#platformLinux').hide();
+        $('#platformMacOS').hide();
+        $('#platform-selector')[0].selectedIndex = 0;
     }
 }
 
 function updateLicense() {
     var product = $('#Product').find('option:selected').text();
     var src = '';
-    if (product == 'APSIM') {
-        if (!$('#radioCom').prop('checked'))
+    if (product == apsimName || product == oldApsimName) {
+        var licenceType = $('#dropDownLicenseType').find('option:selected').text()
+        if (licenceType == nonCommercialLicenceName)
             src = 'APSIM_NonCommercial_RD_licence.htm';
         else {
             src = 'APSIM_Commercial_Licence.htm';
@@ -48,6 +75,5 @@ function updateLicense() {
     } else {
         src = 'OtherDisclaimer.html';
     }
-    $('td#Terms').html(`<iframe height="300px" width="700px" src="${src}" />`);
-    console.log(product);
+    $('#terms').prop('src', src);
 }

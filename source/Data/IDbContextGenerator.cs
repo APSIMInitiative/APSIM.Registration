@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace APSIM.Registration.Service.Data
+namespace APSIM.Registration.Data
 {
     /// <summary>
     /// An interface for a class which can create a DB context.

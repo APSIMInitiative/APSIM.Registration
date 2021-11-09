@@ -1,8 +1,8 @@
-using APSIM.Registration.Service.Models;
+using APSIM.Registration.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 
-namespace APSIM.Registration.Service.Data
+namespace APSIM.Registration.Data
 {
     /// <summary>
     /// This class wraps the registrations table.

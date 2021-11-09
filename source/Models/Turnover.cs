@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace APSIM.Registration.Service.Models
+namespace APSIM.Registration.Models
 {
     /// <summary>
     /// Company sales turnover categories.

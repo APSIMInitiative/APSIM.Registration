@@ -4,7 +4,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace APSIM.Registration.Service.Utilities
+namespace APSIM.Registration.Utilities
 {
     public static class WebUtilities
     {

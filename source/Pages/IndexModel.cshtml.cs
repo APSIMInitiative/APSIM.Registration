@@ -1,16 +1,16 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using APSIM.Registration.Service.Data;
+using APSIM.Registration.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using APSIM.Registration.Service.Models;
-using APSIM.Registration.Service.Controllers;
+using APSIM.Registration.Models;
+using APSIM.Registration.Controllers;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using APSIM.Registration.Service.Utilities;
+using APSIM.Registration.Utilities;
 using ISO3166;
 using System.Net.Mail;
 using System.Net;
@@ -19,7 +19,7 @@ using System.Reflection;
 using System.IO;
 using System.Net.Mime;
 
-namespace APSIM.Registration.Service.Pages
+namespace APSIM.Registration.Pages
 {
     public class IndexModel : PageModel
     {

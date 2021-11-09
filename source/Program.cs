@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace APSIM.Registration.Service
+namespace APSIM.Registration
 {
     public class Program
     {

@@ -1,8 +1,8 @@
 using System;
-using APSIM.Registration.Service.Models;
+using APSIM.Registration.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace APSIM.Registration.Service.Data
+namespace APSIM.Registration.Data
 {
     /// <summary>
     /// An interface for a subscriptions DB context.

@@ -11,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using APSIM.Registration.Service.Data;
+using APSIM.Registration.Data;
 using Microsoft.EntityFrameworkCore;
-using APSIM.Registration.Service.Controllers;
+using APSIM.Registration.Controllers;
 
-namespace APSIM.Registration.Service
+namespace APSIM.Registration
 {
     public class Startup
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace APSIM.Registration.Service.Models
+namespace APSIM.Registration.Models
 {
     /// <summary>A class for holding info about an APSIM classic build.</summary>
     public class BuildJob

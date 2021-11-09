@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace APSIM.Registration.Service.Models
+namespace APSIM.Registration.Models
 {
     /// <summary>
     /// An class encapsulating an upgrade 

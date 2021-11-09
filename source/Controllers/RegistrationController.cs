@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using APSIM.Registration.Service.Models;
-using APSIM.Registration.Service.Data;
+using APSIM.Registration.Models;
+using APSIM.Registration.Data;
 
-namespace APSIM.Registration.Service.Controllers
+namespace APSIM.Registration.Controllers
 {
     [ApiController]
     [Route("api")]

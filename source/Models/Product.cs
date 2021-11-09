@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace APSIM.Registration.Service.Models
+namespace APSIM.Registration.Models
 {
     /// <summary>
     /// Encapsulates a software package maintained by the APSIM Initiative.

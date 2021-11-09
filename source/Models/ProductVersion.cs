@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace APSIM.Registration.Service.Models
+namespace APSIM.Registration.Models
 {
     /// <summary>
     /// Encapsulates a version or upgrade of a <see cref="Product"/>.

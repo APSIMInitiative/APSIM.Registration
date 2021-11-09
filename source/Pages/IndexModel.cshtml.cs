@@ -181,7 +181,16 @@ namespace APSIM.Registration.Pages
             else
             {
                 ShowIndex = false;
-                ShowRegistrationForm = !IsRegistered(email);
+                ShowRegistrationForm = true;
+                try
+                {
+                    ShowRegistrationForm = !IsRegistered(email);
+                }
+                catch (Exception error)
+                {
+                    logger.LogError(error, "Encountered an error while checking if user is registered");
+                }
+
                 if (ShowRegistrationForm)
                 {
                     RegistrationDetails = new Models.Registration();
@@ -204,10 +213,7 @@ namespace APSIM.Registration.Pages
         private bool IsRegistered(string email)
         {
             using (RegistrationsDbContext context = generator.Generate())
-            {
-                Func<Models.Registration, bool> isRegistered = r => r.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase);
-                return context.Registrations.Any(isRegistered);
-            }
+                return context.Registrations.Any(r => r.Email == email);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 const productSelectorSelector = '#product-selector';
+const versionRowSelector = '#versionRow';
 const apsimName = "APSIM Next Generation";
 const oldApsimName = "APSIM Classic";
 const apsoilName = "Apsoil";
@@ -10,7 +11,7 @@ $(document).ready(function () {
     $('#Product').change(onProductChanged);
     $(productSelectorSelector).change(onDownloadProductChanged);
     onLicenseTypeChanged();
-    updateLicense();
+    onProductChanged();
     onDownloadProductChanged();
 });
 
@@ -52,13 +53,26 @@ function onProductChanged() {
     // selection if apsoil is selected.
     updateLicense();
     var product = $('#Product').find('option:selected').text();
+
+    // If user has selected apsim (ng), show the Linux/MacOS platforms.
+    // Otherwise, hide them.
     if (product == apsimName) {
         $('#platformLinux').show();
         $('#platformMacOS').show();
     } else {
         $('#platformLinux').hide();
         $('#platformMacOS').hide();
-        $('#platform-selector')[0].selectedIndex = 0;
+        $('#platform-selector').prop('selectedIndex', 0);
+    }
+
+    // If user has selected old apsim, show the version dropdown.
+    // (This allows them to select historical major releases such as 7.9).
+    // Otherwise, hide the version selector.
+    if (product == oldApsimName) {
+        $(versionRowSelector).show();
+    } else {
+        $(versionRowSelector).hide();
+        $(versionRowSelector).prop('selectedIndex', 0);
     }
 }
 
@@ -75,5 +89,5 @@ function updateLicense() {
     } else {
         src = 'OtherDisclaimer.html';
     }
-    $('#terms').prop('src', src);
+    $('#terms').prop('src', `/html/${src}`);
 }

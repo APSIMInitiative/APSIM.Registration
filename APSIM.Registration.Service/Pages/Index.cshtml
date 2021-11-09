@@ -24,23 +24,37 @@
 }
 @if (Model.ShowRegistrationForm)
 {
-    <h1>APSIM Registration System</h1>
-    <fieldset>
+    <h1>APSIM Initiative Product Registration</h1>
+    @* <fieldset> *@
         <form method="post">
             <table>
                 <tr>
                     <td class="property-name-cell">Product:</td>
                     <td class="table-input-cell">
                         @* <input type="text" asp-for="RegistrationDetails.Product"> *@
-                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@Model.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
+                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
                     </td>
                     <td><span class="error" asp-validation-for="RegistrationDetails.Product"></span></td>
                 </tr>
                 <tr id="versionRow">
-                    @* <td class="property-name-cell">Version:</td> *@
+                    <td class="property-name-cell">Version:</td>
                     <td class="table-input-cell">
-                        <input type="hidden" asp-for="RegistrationDetails.Version">
-                        @* <select id="version-selector" asp-for="RegistrationDetails.Version"> *@
+                        <select id="version-selector" asp-for="RegistrationDetails.Version">
+                            <option value="Latest">Latest</option>
+                            <option value="7.10">7.10</option>
+                            <option value="7.9">7.9</option>
+                            <option value="7.8">7.8</option>
+                            <option value="7.7">7.7</option>
+                            <option value="7.6">7.6</option>
+                            <option value="7.5">7.5</option>
+                            <option value="7.4">7.4</option>
+                            <option value="7.3">7.3</option>
+                            <option value="7.2">7.2</option>
+                            <option value="7.1">7.1</option>
+                            <option value="7.0">7.0</option>
+                            <option value="6.1">6.1</option>
+                            <option value="6.0">6.0</option>
+                        </select>
                     </td>
                     <td><span class="error" asp-validation-for="RegistrationDetails.Version"></span></td>
                 </tr>
@@ -115,17 +129,21 @@
                     <td class="table-input-cell"><input type="hidden" asp-for="RegistrationDetails.Type" value="Registration"></td>
                 </tr>
             </table>
+            <div id="subscribeArea">
+                <input name="doSubscribe" asp-for="Subscribe">
+                <label for="doSubscribe">The APSIM Initiative will forward updates on APSIM-related developments and improvements as well as the upcoming APSIM-related events including training workshops.</label>
+            </div>
             <input type="submit" value="Submit" asp-page-handler="Register">
         </form>
-        <iframe id="terms" height="300px" width="700px" />
-    </fieldset>
+    @* </fieldset> *@
+    <iframe id="terms" height="300px" width="700px" src="~/html/APSIM_NonCommercial_RD_Licence.htm" />
 }
 @if (Model.ShowDownloads)
 {
     <h1>APSIM Downloads</h1>
     <p>
         Product: 
-        @Html.DropDownList("product-selector", Model.Products.Select(p => new SelectListItem(p.Name, p.Name)))
+        @Html.DropDownList("product-selector", IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name)))
         <!-- Downloads Table -->
         <table id="tblDownloads">
             <tr>
@@ -134,7 +152,7 @@
                 <th>Release Information</th>
                 <th>Download Link</th>
             </tr>
-            @foreach (Product product in Model.Products)
+            @foreach (Product product in IndexModel.Products)
             {
                 foreach (ProductVersion version in product.GetVersions(Model.NumDownloads))
                 {

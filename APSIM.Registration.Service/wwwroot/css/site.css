@@ -20,3 +20,10 @@ a {
 a:hover {
     text-decoration: underline;
 }
+#terms {
+    margin-top: 1em;
+}
+#subscribeArea {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

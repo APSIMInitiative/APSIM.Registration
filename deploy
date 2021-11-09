@@ -6,7 +6,7 @@ set -euo pipefail
 # Get the directory path of this script (should be root of the repo).
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-service="$DIR/APSIM.Registration.Service"
+service="$DIR/source"
 cd "$service"
 
 out="$service/bin/Release/net5.0/linux-x64/publish/"

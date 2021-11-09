@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/APSIM.Registration.Service/bin/Debug/net5.0/APSIM.Registration.Service.dll",
+            "program": "${workspaceFolder}/source/bin/Debug/net5.0/APSIM.Registration.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/APSIM.Registration.Service",
+            "cwd": "${workspaceFolder}/source",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",

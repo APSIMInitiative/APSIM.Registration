@@ -47,6 +47,32 @@ namespace APSIM.Registration.Controllers
         }
 
         /// <summary>
+        /// Register an upgrade for the given email address.
+        /// </summary>
+        /// <param name="email">The email address.</param>
+        [HttpPost("upgrade")]
+        public async Task<ActionResult> UpgradeAsync(string email, string version)
+        {
+            try
+            {
+                using (IRegistrationsDbContext context = dbContextGenerator.Generate())
+                {
+                    Models.Registration first = context.Registrations.FirstOrDefault(r => r.Email == email);
+                    Models.Registration newRegistration = new Models.Registration(first);
+                    newRegistration.Type = "Upgrade";
+                    newRegistration.Version = version;
+                    await context.Registrations.AddAsync(newRegistration);
+                    context.SaveChanges();
+                }
+                return Ok();
+            }
+            catch (Exception error)
+            {
+                return HandleError(error);
+            }
+        }
+
+        /// <summary>
         /// Check if a user with a given email address has previously
         /// accepted the licence terms and conditions.
         /// </summary>

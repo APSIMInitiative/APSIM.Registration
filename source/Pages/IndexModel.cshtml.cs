@@ -41,6 +41,8 @@ namespace APSIM.Registration.Pages
         private const string commercialLicencePdf = "APSIM_Commercial_Licence.pdf";
         private const string nonCommercialLicencePdf ="APSIM_NonCommercial_RD_licence.pdf";
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
+        private const string versionCookieName = "Version";
+        private const string emailCookieName = "Email";
 
         public static IReadOnlyList<Product> Products => new List<Product>()
         {
@@ -125,6 +127,48 @@ namespace APSIM.Registration.Pages
                 CheckIsRegistered(Email);
         }
 
+        public async Task<ActionResult> OnGetDownloadAsync(string version, string platform)
+        {
+            // fixme: this is slow
+            ProductVersion match = GetProductVersion(version);
+            if (match == null)
+                return Page();
+
+            string email = HttpContext.Session.GetString(emailCookieName);
+            if (string.IsNullOrEmpty(email))
+            {
+                HttpContext.Session.SetString(versionCookieName, version);
+                // index page
+            }
+            else
+            {
+                logger.LogInformation($"Registering an upgrade for {email}");
+                await controller.UpgradeAsync(email, match.Number);
+            }
+
+            string href = GetDownloadURL(match, platform);
+            if (string.IsNullOrEmpty(href))
+                return Page();
+
+            return Redirect(href);
+        }
+
+        /// <summary>
+        /// Find a product version with a matching version name.
+        /// </summary>
+        /// <param name="versionName">Version name.</param>
+        private ProductVersion GetProductVersion(string versionName)
+        {
+            // fixme - slow
+            foreach (Product product in Products)
+            {
+                ProductVersion version = GetProductVersion(product, versionName);
+                if (version != null)
+                    return version;
+            }
+            return null;
+        }
+
         public async Task<ActionResult> OnPostSubmitRegistrationAsync()
         {
             Request.QueryString = QueryString.Empty;
@@ -139,6 +183,7 @@ namespace APSIM.Registration.Pages
 
             try
             {
+                Email = RegistrationDetails.Email;
                 logger.LogDebug($"Adding new registration to registrations DB...");
                 controller.Register(RegistrationDetails);
 
@@ -162,6 +207,7 @@ namespace APSIM.Registration.Pages
                 logger.LogError(err, $"An error occurred while performing registration");
             }
 
+            HttpContext.Session.SetString(emailCookieName, Email);
             ShowRegistrationForm = false;
             ShowDownloads = true;
             PageResult result = Page();
@@ -181,13 +227,14 @@ namespace APSIM.Registration.Pages
             else
             {
                 ShowIndex = false;
-                ShowRegistrationForm = true;
+                HttpContext.Session.SetString(emailCookieName, email);
                 try
                 {
-                    ShowRegistrationForm = !IsRegistered(email);
+                    ShowRegistrationForm = !controller.IsRegistered(email).Value;
                 }
                 catch (Exception error)
                 {
+                    ShowRegistrationForm = true;
                     logger.LogError(error, "Encountered an error while checking if user is registered");
                 }
 
@@ -212,17 +259,6 @@ namespace APSIM.Registration.Pages
             RegistrationDetails.Platform = "Windows";
             RegistrationDetails.LicenceType = LicenceType.NonCommercial;
             RegistrationDetails.Country = "Australia";
-        }
-
-        /// <summary>
-        /// Check if an email address has an active registration
-        /// associated with it.
-        /// </summary>
-        /// <param name="email">The email address to be checked.</param>
-        private bool IsRegistered(string email)
-        {
-            using (RegistrationsDbContext context = generator.Generate())
-                return context.Registrations.Any(r => r.Email == email);
         }
 
         /// <summary>
@@ -405,6 +441,9 @@ namespace APSIM.Registration.Pages
         /// </summary>
         /// <param name="product">The product.</param>
         /// <param name="versionName">Version name.</param>
+        /// <remarks>
+        /// fixme: this is slow
+        /// </remarks>
         private static ProductVersion GetProductVersion(Product product, string versionName)
         {
             if (versionName == versionNameLatest)

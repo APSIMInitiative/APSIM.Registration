@@ -47,5 +47,35 @@ namespace APSIM.Registration.Models
         public string CompanyTurnover { get; set; }
         public string CompanyRego { get; set; }
         public string CompanyAddress { get; set; }
+
+        /// <summary>
+        /// Create a new <see cref="Registration"/> instance.
+        /// </summary>
+        public Registration()
+        {
+        }
+
+        /// <summary>
+        /// Create a copy of another registration.
+        /// </summary>
+        /// <param name="old">The registration to be copied.</param>
+        public Registration(Registration old)
+        {
+            FirstName = old.FirstName;
+            LastName = old.LastName;
+            Organisation = old.Organisation;
+            Country = old.Country;
+            Email = old.Email;
+            Product = old.Product;
+            Version = old.Version;
+            Platform = old.Platform;
+            Type = old.Type;
+            LicenceType = old.LicenceType;
+            LicensorName = old.LicensorName;
+            LicensorEmail = old.LicensorEmail;
+            CompanyTurnover = old.CompanyTurnover;
+            CompanyRego = old.CompanyRego;
+            CompanyAddress = old.CompanyAddress;
+        }
     }
 }

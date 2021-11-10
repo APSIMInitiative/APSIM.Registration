@@ -116,7 +116,7 @@ namespace APSIM.Registration.Pages
         private async Task Submit()
         {
             if (ShowRegistrationForm)
-                await OnPostRegisterAsync();
+                await OnPostSubmitRegistrationAsync();
             else if (ShowDownloads)
             {
                 // Do nothing
@@ -125,7 +125,7 @@ namespace APSIM.Registration.Pages
                 CheckIsRegistered(Email);
         }
 
-        public async Task<ActionResult> OnPostRegisterAsync()
+        public async Task<ActionResult> OnPostSubmitRegistrationAsync()
         {
             Request.QueryString = QueryString.Empty;
             ShowIndex = false;
@@ -193,16 +193,25 @@ namespace APSIM.Registration.Pages
 
                 if (ShowRegistrationForm)
                 {
-                    RegistrationDetails = new Models.Registration();
-                    RegistrationDetails.Product = apsimName;
-                    RegistrationDetails.Version = versionNameLatest;
-                    RegistrationDetails.Platform = "Windows";
-                    RegistrationDetails.LicenceType = LicenceType.NonCommercial;
                     RegistrationDetails.Email = email;
-                    RegistrationDetails.Country = "Australia";
+                    OnGetRegister();
                 }
-                ShowDownloads = !ShowRegistrationForm;
+                else
+                    ShowDownloads = true;
             }
+        }
+
+        public void OnGetRegister()
+        {
+            ShowIndex = false;
+            ShowDownloads = false;
+            ShowRegistrationForm = true;
+            RegistrationDetails = new Models.Registration();
+            RegistrationDetails.Product = apsimName;
+            RegistrationDetails.Version = versionNameLatest;
+            RegistrationDetails.Platform = "Windows";
+            RegistrationDetails.LicenceType = LicenceType.NonCommercial;
+            RegistrationDetails.Country = "Australia";
         }
 
         /// <summary>

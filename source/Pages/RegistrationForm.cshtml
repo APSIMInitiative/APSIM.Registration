@@ -130,5 +130,9 @@
         {
         <iframe id="terms" height="300px" width="700px" src="~/html/APSIM_NonCommercial_RD_Licence.htm" />
         }
+@if (!string.IsNullOrEmpty(Model.VersionFilter))
+{
+    <p>You have selected version @Model.VersionFilter.</p>
+}
     </body>
 </html>

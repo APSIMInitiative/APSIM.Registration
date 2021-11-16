@@ -20,5 +20,9 @@
             <input type="submit" value="Go">
         </form>
         <p>Please enter your email address. If you have registered, you will be taken to the downloads page. If you have not registered, you will be prompted to do so.</p>
+@if (!string.IsNullOrEmpty(Model.VersionFilter))
+{
+    <p>You have selected version @Model.VersionFilter.</p>
+}
     </body>
 </html>

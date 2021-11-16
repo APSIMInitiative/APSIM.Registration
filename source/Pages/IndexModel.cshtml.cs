@@ -64,6 +64,12 @@ namespace APSIM.Registration.Pages
             RegistrationForm,
             Downloads
         }
+        private static readonly CookieOptions cookieOptions = new CookieOptions()
+        {
+            Secure = true,
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict
+        };
 
         [BindProperty]
         public View Sender { get; set; }
@@ -129,7 +135,7 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Create the registration form view.
         /// </summary>
-        private ActionResult RegistrationForm()
+        private ActionResult RegistrationForm(string email)
         {
             RegistrationDetails = new Models.Registration();
             RegistrationDetails.Product = apsimName;
@@ -137,10 +143,19 @@ namespace APSIM.Registration.Pages
             RegistrationDetails.Platform = "Windows";
             RegistrationDetails.LicenceType = LicenceType.NonCommercial;
             RegistrationDetails.Country = "Australia";
-            RegistrationDetails.Email = HttpContext.Session.GetString(emailCookieName);
+            RegistrationDetails.Email = email;
             Organisation org = FindAIMember(RegistrationDetails.Email);
             if (org != null)
                 RegistrationDetails.Organisation = org.Name;
+            if (!string.IsNullOrEmpty(VersionFilter))
+            {
+                (Product product, ProductVersion version) = GetProductVersion(VersionFilter);
+                if (product != null && version != null)
+                {
+                    RegistrationDetails.Product = product.Name;
+                    RegistrationDetails.Version = version.Number;
+                }
+            }
             
             return Partial("RegistrationForm", this);
         }
@@ -205,7 +220,7 @@ namespace APSIM.Registration.Pages
 
                 // Attempt to find a matching product version. If nothing is found,
                 // serve the downloads page and log a warning message (server-side).
-                ProductVersion productVersion = GetProductVersion(version);
+                (Product actualProduct, ProductVersion productVersion) = GetProductVersion(version);
                 if (productVersion == null)
                 {
                     logger.LogWarning($"Unable to serve {product} {version} - unknown product or version.");
@@ -217,7 +232,7 @@ namespace APSIM.Registration.Pages
                 // an upgrade to the DB under the user's email address.
                 try
                 {
-                    await controller.UpgradeAsync(email, productVersion.Number);
+                    await controller.UpgradeAsync(email, productVersion.Number, platform);
                 }
                 catch (Exception err)
                 {
@@ -231,7 +246,7 @@ namespace APSIM.Registration.Pages
             // If we get to this point, an email address has been provided,
             // but there is no registration associated with the email in the DB.
             // Therefore we need to show the registration form.
-            return RegistrationForm();
+            return RegistrationForm(email);
         }
 
         /// <summary>
@@ -242,11 +257,11 @@ namespace APSIM.Registration.Pages
         {
             // Ensure registration details are valid.
             if (!ModelState.IsValid)
-                return RegistrationForm();
+                return RegistrationForm(RegistrationDetails.Email);
 
             // Registration details are valid. Store the user's email address in
             // the session data for later retrieval.
-            HttpContext.Session.SetString(emailCookieName, RegistrationDetails.Email);
+            HttpContext.Response.Cookies.Append(emailCookieName, RegistrationDetails.Email, cookieOptions);
 
             // Perform some administrative tasks. Any errors will be logged but
             // not displayed to the user, who just wants to see the downloads page.
@@ -284,12 +299,16 @@ namespace APSIM.Registration.Pages
 
         private string SaveToSession(string value, string cookieName)
         {
-            // If no value provided - use session value (if available).
+            // If no value provided - use provided cookie value (if available).
             if (string.IsNullOrEmpty(value))
-                return HttpContext.Session.GetString(cookieName);
+            {
+                if (HttpContext.Request.Cookies.TryGetValue(cookieName, out string cookieValue))
+                    return cookieValue;
+                return null;
+            }
 
-            // Otherwise, save this value to the session, and use it.
-            HttpContext.Session.SetString(cookieName, value);
+            // Otherwise, save this value as a cookie.
+            HttpContext.Response.Cookies.Append(cookieName, value, cookieOptions);
             return value;
         }
 
@@ -297,16 +316,16 @@ namespace APSIM.Registration.Pages
         /// Find a product version with a matching version name.
         /// </summary>
         /// <param name="versionName">Version name.</param>
-        private ProductVersion GetProductVersion(string versionName)
+        private (Product, ProductVersion) GetProductVersion(string versionName)
         {
             // fixme - slow
             foreach (Product product in Products)
             {
                 ProductVersion version = GetProductVersion(product, versionName);
                 if (version != null)
-                    return version;
+                    return (product, version);
             }
-            return null;
+            return (null, null);
         }
 
         /// <summary>
@@ -512,8 +531,6 @@ namespace APSIM.Registration.Pages
             ProductVersion match = versions.FirstOrDefault(v => v.Number == versionName);
             if (match == null)
                 match = versions.FirstOrDefault(v => v.Number.Contains(versionName));
-            if (match == null)
-                throw new ArgumentException($"Unable to find {product.Name} version {versionName}");
             return match;
         }
 

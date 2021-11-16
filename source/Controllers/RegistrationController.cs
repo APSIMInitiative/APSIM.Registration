@@ -51,7 +51,7 @@ namespace APSIM.Registration.Controllers
         /// </summary>
         /// <param name="email">The email address.</param>
         [HttpPost("upgrade")]
-        public async Task<ActionResult> UpgradeAsync(string email, string version)
+        public async Task<ActionResult> UpgradeAsync(string email, string version, string platform)
         {
             try
             {
@@ -61,6 +61,7 @@ namespace APSIM.Registration.Controllers
                     Models.Registration newRegistration = new Models.Registration(first);
                     newRegistration.Type = "Upgrade";
                     newRegistration.Version = version;
+                    newRegistration.Platform = platform;
                     await context.Registrations.AddAsync(newRegistration);
                     context.SaveChanges();
                 }

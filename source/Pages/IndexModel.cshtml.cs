@@ -44,7 +44,19 @@ namespace APSIM.Registration.Pages
         private const string emailCookieName = "Email";
         public IReadOnlyList<Organisation> AiMembers { get; private init; }
 
-        public IReadOnlyList<Product> Products { get; private init; }
+        static IndexModel()
+        {
+            products  = new List<Product>()
+            {
+                new Product(apsimName, GetAllApsimXUpgrades()),
+                new Product(oldApsimName, GetApsimClassicUpgrades()),
+                new Product(apsoilName, GetApsoilVersions()),
+            };
+        }
+
+        private static readonly IReadOnlyList<Product> products;
+
+        public static IReadOnlyList<Product> Products { get => products; }
 
         public enum View
         {
@@ -82,7 +94,7 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Filter for versions to be displayed to the user.
         /// </summary>
-        private string versionFilter;
+        public string VersionFilter { get; private set; }
 
         /// <summary>
         /// Create a new <see cref="RegisterModel"/> instance.
@@ -94,12 +106,6 @@ namespace APSIM.Registration.Pages
             this.controller = controller;
             this.logger = logger;
 
-            Products = new List<Product>()
-            {
-                new Product(apsimName, GetApsimXUpgrades),
-                new Product(oldApsimName, GetApsimClassicUpgrades),
-                new Product(apsoilName, GetApsoilVersions),
-            };
             AiMembers = new List<Organisation>()
             {
                 new Organisation("CSIRO", "csiro.au"),
@@ -170,7 +176,7 @@ namespace APSIM.Registration.Pages
         {
             email = SaveToSession(email, emailCookieName);
             if (!string.IsNullOrEmpty(version))
-                versionFilter = version;
+                VersionFilter = version;
 
             // If we're here from the registration form, perform the registration.
             if (Sender == View.RegistrationForm)
@@ -306,8 +312,7 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Get all apsoil versions available for download.
         /// </summary>
-        /// <param name="n">Max number of versions.</param>
-        private static List<ProductVersion> GetApsoilVersions(int n)
+        private static IReadOnlyList<ProductVersion> GetApsoilVersions()
         {
             return new List<ProductVersion>() { new ProductVersion(apsoilName, "7.1", "", new DateTime(2013, 5, 31), apsoilDownloadUrl, null, null) };
         }
@@ -315,15 +320,14 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Get all available versions of old apsim.
         /// </summary>
-        /// <param name="n">Maximum number of versions to return.</param>
-        private List<ProductVersion> GetApsimClassicUpgrades(int n)
+        private static IReadOnlyList<ProductVersion> GetApsimClassicUpgrades()
         {
             // If version filter is provided, fetch all available versions from
             // builds API.
-            if (n <= 0 || !string.IsNullOrEmpty(versionFilter))
-                n = 1000; // fixme
+            // if (n <= 0 || !string.IsNullOrEmpty(versionFilter))
+            //     n = 1000; // fixme
 
-            List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetReleases?numRows={n}");
+            List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetReleases?numRows=100000");
 
             // fixme - we need to upload all of the legacy installers to apsim.info but need
             // more disk space to do so. In the meantime I've uploaded the versions where
@@ -334,11 +338,11 @@ namespace APSIM.Registration.Pages
             // fixme - start time is not the same as merge time!
             List<ProductVersion> result = upgrades.Select(u => new ProductVersion(u.Description, u.VersionString, u.IssueURL, u.StartTime, u.WindowsInstallerURL, u.LinuxBinariesURL, null)).ToList();
             result.AddRange(GetStaticApsimClassicVersions());
-            if (result.Count > n)
-                result = result.Take(n).ToList();
+            // if (result.Count > n)
+            //     result = result.Take(n).ToList();
 
-            if (!string.IsNullOrEmpty(versionFilter))
-                result = result.Where(v => v.Number.Contains(versionFilter)).ToList();
+            // if (!string.IsNullOrEmpty(versionFilter))
+            //     result = result.Where(v => v.Number.Contains(versionFilter)).ToList();
 
             return result;
         }
@@ -367,22 +371,15 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Get all available apsim versions.
         /// </summary>
-        /// <param name="n">Maximum number of versions to return.</param>
-        private List<ProductVersion> GetApsimXUpgrades(int n)
+        private static IReadOnlyList<ProductVersion> GetAllApsimXUpgrades()
         {
-            // If searching for a particular version, remove limiter on number
-            // of rows. Ultimately it would be better if there were a search
-            // endpoint on the builds API.
-            if (!string.IsNullOrEmpty(versionFilter))
-                n = 0;
+            List<Upgrade> upgrades = WebUtilities.CallRESTService<List<Upgrade>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/Builds.svc/GetLastNUpgrades");
+            return upgrades.Select(u => new ProductVersion(u)).ToList();
 
-            List<Upgrade> upgrades = WebUtilities.CallRESTService<List<Upgrade>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/Builds.svc/GetLastNUpgrades?n={n}");
-            List<ProductVersion> versions = upgrades.Select(u => new ProductVersion(u)).ToList();
+            // if (!string.IsNullOrEmpty(versionFilter))
+            //     versions = versions.Where(v => v.Number.Contains(versionFilter, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
-            if (!string.IsNullOrEmpty(versionFilter))
-                versions = versions.Where(v => v.Number.Contains(versionFilter, StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            return versions;
+            // return versions;
         }
 
         /// <summary>
@@ -506,12 +503,12 @@ namespace APSIM.Registration.Pages
         {
             if (versionName == versionNameLatest)
             {
-                ProductVersion version = product.GetVersions(1).FirstOrDefault();
+                ProductVersion version = product.Versions.FirstOrDefault();
                 if (version == null)
                     throw new Exception($"Prodcut {product.Name} has no versions available for download");
                 return version;
             }
-            List<ProductVersion> versions = product.GetVersions(0);
+            IEnumerable<ProductVersion> versions = product.Versions;
             ProductVersion match = versions.FirstOrDefault(v => v.Number == versionName);
             if (match == null)
                 match = versions.FirstOrDefault(v => v.Number.Contains(versionName));

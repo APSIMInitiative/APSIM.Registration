@@ -19,7 +19,7 @@
                     <td class="property-name-cell">Product:</td>
                     <td class="table-input-cell">
                         @* <input type="text" asp-for="RegistrationDetails.Product"> *@
-                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@Model.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
+                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
                     </td>
                     <td><span class="error" asp-validation-for="RegistrationDetails.Product"></span></td>
                 </tr>

@@ -16,7 +16,7 @@
         <h1>APSIM Downloads</h1>
         <p>
             Product: 
-            @Html.DropDownList("product-selector", Model.Products.Select(p => new SelectListItem(p.Name, p.Name)))
+            @Html.DropDownList("product-selector", IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name)))
             <!-- Downloads Table -->
             <table id="tblDownloads">
                 <tr>
@@ -25,9 +25,14 @@
                     <th>Release Information</th>
                     <th>Download Link</th>
                 </tr>
-                @foreach (Product product in Model.Products)
+                @foreach (Product product in IndexModel.Products)
                 {
-                    foreach (ProductVersion version in product.GetVersions(Model.NumDownloads))
+                    IEnumerable<ProductVersion> products = product.Versions;
+                    if (!string.IsNullOrEmpty(Model.VersionFilter))
+                        products = products.Where(p => p.Number.Contains(Model.VersionFilter, StringComparison.CurrentCultureIgnoreCase));
+                    if (Model.NumDownloads > 0)
+                        products = products.Take(Model.NumDownloads);
+                    foreach (ProductVersion version in products)
                     {
                         <tr class="@product.Name">
                             <td>@version.ReleaseDate.ToString("yyyy-MM-dd")</td>

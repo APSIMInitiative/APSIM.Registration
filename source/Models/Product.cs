@@ -11,9 +11,9 @@ namespace APSIM.Registration.Models
     public class Product
     {
         /// <summary>
-        /// Function which will fetch available versions of this product.
+        /// All available versions of this product.
         /// </summary>
-        private Func<int, List<ProductVersion>> GetAvailableVersions;
+        public IReadOnlyList<ProductVersion> Versions { get; private init; }
 
         /// <summary>
         /// Name of the product.
@@ -21,22 +21,14 @@ namespace APSIM.Registration.Models
         public string Name { get; private set; }
 
         /// <summary>
-        /// Function which will fetch available versions of this product.
-        /// </summary>
-        public List<ProductVersion> GetVersions(int n)
-        {
-            return GetAvailableVersions(n);
-        }
-
-        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="name">Name of the product.</param>
-        /// <param name="getVersions">Function which will fetch available versions of this product.</param>
-        public Product(string name, Func<int, List<ProductVersion>> getVersions)
+        /// <param name="versions">All available versions of this product.</param>
+        public Product(string name, IReadOnlyList<ProductVersion> versions)
         {
             Name = name;
-            GetAvailableVersions = getVersions;
+            Versions = versions;
         }
     }
 }

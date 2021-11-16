@@ -120,8 +120,10 @@
                 </tr>
             </table>
             <div id="subscribeArea">
-                <input name="doSubscribe" asp-for="Subscribe">
-                <label for="doSubscribe">The APSIM Initiative will forward updates on APSIM-related developments and improvements as well as the upcoming APSIM-related events including training workshops.</label>
+                <label>
+                    <input name="doSubscribe" asp-for="Subscribe">
+                    The APSIM Initiative will forward updates on APSIM-related developments and improvements as well as the upcoming APSIM-related events including training workshops.
+                </label>
             </div>
             <input type="hidden" asp-for="Sender" value="RegistrationForm">
             <input type="submit" value="@Model.SubmitButtonText()">

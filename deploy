@@ -26,3 +26,4 @@ service_file="$DIR/APSIM.Registration.service"
 rsync -vaz "$service_file" "$server":/home/webmaster/.config/systemd/user/
 ssh "$server" systemctl --user daemon-reload
 ssh "$server" systemctl --user restart APSIM.Registration
+ssh "$server" systemctl --user status APSIM.Registration

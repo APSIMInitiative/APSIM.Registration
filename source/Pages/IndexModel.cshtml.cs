@@ -41,15 +41,20 @@ namespace APSIM.Registration.Pages
         private const string commercialLicencePdf = "APSIM_Commercial_Licence.pdf";
         private const string nonCommercialLicencePdf ="APSIM_NonCommercial_RD_licence.pdf";
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
-        private const string versionCookieName = "Version";
         private const string emailCookieName = "Email";
+        public IReadOnlyList<Organisation> AiMembers { get; private init; }
 
-        public static IReadOnlyList<Product> Products => new List<Product>()
+        public IReadOnlyList<Product> Products { get; private init; }
+
+        public enum View
         {
-            new Product(apsimName, GetApsimXUpgrades),
-            new Product(oldApsimName, GetApsimClassicUpgrades),
-            new Product(apsoilName, GetApsoilVersions),
-        };
+            LandingPage,
+            RegistrationForm,
+            Downloads
+        }
+
+        [BindProperty]
+        public View Sender { get; set; }
 
         private readonly IDbContextGenerator<RegistrationsDbContext> generator;
         private readonly RegistrationController controller;
@@ -58,41 +63,26 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Max number of rows of product versions to show on the downloads page.
         /// </summary>
-        /// <value></value>
+        [BindProperty]
         public int NumDownloads { get; set; } = 10;
-
-        /// <summary>
-        /// State variable - show the index page?
-        /// </summary>
-        public bool ShowIndex { get; private set; } = true;
-
-        /// <summary>
-        /// State variable - show the registration form?
-        /// </summary>
-        public bool ShowRegistrationForm { get; private set; }
-
-        /// <summary>
-        /// State variable - show the downloads area?
-        /// </summary>
-        public bool ShowDownloads { get; private set; }
 
         /// <summary>
         /// This is bound to a checkbox displayed to the user. If true (checked),
         /// the user wants to subscribe to the mailing list.
         /// </summary>
+        [BindProperty]
         public bool Subscribe { get; private set; }
-
-        /// <summary>
-        /// This is bound to the email input textbox on the index page.
-        /// </summary>
-        [BindProperty(SupportsGet = true)]
-        public string Email { get; set; }
 
         /// <summary>
         /// This is bound to the inputs on the registration page.
         /// </summary>
         [BindProperty]
         public Models.Registration RegistrationDetails { get; set; }
+
+        /// <summary>
+        /// Filter for versions to be displayed to the user.
+        /// </summary>
+        private string versionFilter;
 
         /// <summary>
         /// Create a new <see cref="RegisterModel"/> instance.
@@ -103,54 +93,198 @@ namespace APSIM.Registration.Pages
             this.generator = generator;
             this.controller = controller;
             this.logger = logger;
-        }
 
-        public async Task OnGetAsync()
-        {
-            await Submit();
-        }
-
-        public async Task OnPostAsync()
-        {
-            await Submit();
-        }
-
-        private async Task Submit()
-        {
-            if (ShowRegistrationForm)
-                await OnPostSubmitRegistrationAsync();
-            else if (ShowDownloads)
+            Products = new List<Product>()
             {
-                // Do nothing
-            }
-            else
-                CheckIsRegistered(Email);
+                new Product(apsimName, GetApsimXUpgrades),
+                new Product(oldApsimName, GetApsimClassicUpgrades),
+                new Product(apsoilName, GetApsoilVersions),
+            };
+            AiMembers = new List<Organisation>()
+            {
+                new Organisation("CSIRO", "csiro.au"),
+                new Organisation("UQ", "uq.edu.au"),
+                new Organisation("USQ", "usq.edu.au"),
+                new Organisation("AgResearch", "agresearch.co.nz"),
+                new Organisation("Plant and Food Research", "plantandfood.co.nz"),
+                new Organisation("Iowa State University", "iastate.edu"),
+                new Organisation("DAF", "daf.qld.gov.au")
+            };
         }
 
-        public async Task<ActionResult> OnGetDownloadAsync(string version, string platform)
+        /// <summary>
+        /// Create the landing page view.
+        /// </summary>
+        private ActionResult LandingPage()
         {
-            // fixme: this is slow
-            ProductVersion match = GetProductVersion(version);
-            if (match == null)
-                return Page();
+            return Page();
+        }
 
-            string email = HttpContext.Session.GetString(emailCookieName);
+        /// <summary>
+        /// Create the registration form view.
+        /// </summary>
+        private ActionResult RegistrationForm()
+        {
+            RegistrationDetails = new Models.Registration();
+            RegistrationDetails.Product = apsimName;
+            RegistrationDetails.Version = versionNameLatest;
+            RegistrationDetails.Platform = "Windows";
+            RegistrationDetails.LicenceType = LicenceType.NonCommercial;
+            RegistrationDetails.Country = "Australia";
+            RegistrationDetails.Email = HttpContext.Session.GetString(emailCookieName);
+            Organisation org = FindAIMember(RegistrationDetails.Email);
+            if (org != null)
+                RegistrationDetails.Organisation = org.Name;
+            
+            return Partial("RegistrationForm", this);
+        }
+
+        /// <summary>
+        /// Create the downloads page view.
+        /// </summary>
+        private ActionResult Downloads()
+        {
+            return Partial("Downloads", this);
+        }
+
+        /// <summary>
+        /// Handler for GET requests.
+        /// </summary>
+        /// <remarks>
+        /// Should only be called when the user navigates to the registration website.
+        /// </remarks>
+        public async Task<ActionResult> OnGetAsync(string email, string product, string version, string platform)
+        {
+            return await HandleRequest(email, product, version, platform);
+        }
+
+        /// <summary>
+        /// Handler for POST requests.
+        /// </summary>
+        public async Task<ActionResult> OnPostAsync(string email, string product, string version, string platform)
+        {
+            return await HandleRequest(email, product, version, platform);
+        }
+
+        public async Task<ActionResult> HandleRequest(string email, string product, string version, string platform)
+        {
+            email = SaveToSession(email, emailCookieName);
+            if (!string.IsNullOrEmpty(version))
+                versionFilter = version;
+
+            // If we're here from the registration form, perform the registration.
+            if (Sender == View.RegistrationForm)
+                return await OnPostSubmitAsync();
+
+            // If no email has been provided, go to landing page.
             if (string.IsNullOrEmpty(email))
+                return LandingPage();
+
+            // If controller is registered, show the downloads page.
+            if (controller.IsRegistered(email).Value)
             {
-                HttpContext.Session.SetString(versionCookieName, version);
-                // index page
-            }
-            else
-            {
-                logger.LogInformation($"Registering an upgrade for {email}");
-                await controller.UpgradeAsync(email, match.Number);
+                // If product, version, or platform have not been provided,
+                // just show the downloads page.
+                if (string.IsNullOrEmpty(version))
+                    return Downloads();
+
+                if (string.IsNullOrEmpty(platform))
+                {
+                    // User requested a specific product and version, but not
+                    // platform. We show the downloads table, filtered to show
+                    // only rows matching the given version filter.
+
+                    return Downloads();
+                }
+
+                // Attempt to find a matching product version. If nothing is found,
+                // serve the downloads page and log a warning message (server-side).
+                ProductVersion productVersion = GetProductVersion(version);
+                if (productVersion == null)
+                {
+                    logger.LogWarning($"Unable to serve {product} {version} - unknown product or version.");
+                    return Downloads();
+                }
+
+                // If a product, version, and platform have all been provided,
+                // we can serve that file. First though, we attempt to register
+                // an upgrade to the DB under the user's email address.
+                try
+                {
+                    await controller.UpgradeAsync(email, productVersion.Number);
+                }
+                catch (Exception err)
+                {
+                    logger.LogError(err, $"Failed to log an upgrade");
+                }
+
+                // Finally, serve the file.
+                return Redirect(GetDownloadURL(productVersion, platform));
             }
 
-            string href = GetDownloadURL(match, platform);
-            if (string.IsNullOrEmpty(href))
-                return Page();
+            // If we get to this point, an email address has been provided,
+            // but there is no registration associated with the email in the DB.
+            // Therefore we need to show the registration form.
+            return RegistrationForm();
+        }
 
-            return Redirect(href);
+        /// <summary>
+        /// Handler for POST requests to the Submit endpoint. This is called
+        /// when the user clicks 'submit' on the registration form.
+        /// </summary>
+        public async Task<ActionResult> OnPostSubmitAsync()
+        {
+            // Ensure registration details are valid.
+            if (!ModelState.IsValid)
+                return RegistrationForm();
+
+            // Registration details are valid. Store the user's email address in
+            // the session data for later retrieval.
+            HttpContext.Session.SetString(emailCookieName, RegistrationDetails.Email);
+
+            // Perform some administrative tasks. Any errors will be logged but
+            // not displayed to the user, who just wants to see the downloads page.
+            try
+            {
+                // Write registration to DB.
+                logger.LogDebug($"Adding new registration to registrations DB...");
+                controller.Register(RegistrationDetails);
+
+                // Optionally subscribe to mailing list.
+                if (Subscribe)
+                {
+                    logger.LogDebug("Subscribing to the mailing list...");
+                    controller.Subscribe(RegistrationDetails.Email);
+                }
+
+                // Send registration email.
+                logger.LogDebug("Sending registration email...");
+                await SendRegistrationEmail();
+
+                // Send invoice email.
+                if (RegistrationDetails.LicenceType == LicenceType.Commercial)
+                {
+                    logger.LogDebug($"Sending invoice email...");
+                    await SendInvoiceEmail();
+                }
+            }
+            catch (Exception err)
+            {
+                logger.LogError(err, $"An error occurred while performing registration");
+            }
+
+            return Downloads();
+        }
+
+        private string SaveToSession(string value, string cookieName)
+        {
+            // If no value provided - use session value (if available).
+            if (string.IsNullOrEmpty(value))
+                return HttpContext.Session.GetString(cookieName);
+
+            // Otherwise, save this value to the session, and use it.
+            HttpContext.Session.SetString(cookieName, value);
+            return value;
         }
 
         /// <summary>
@@ -169,98 +303,6 @@ namespace APSIM.Registration.Pages
             return null;
         }
 
-        public async Task<ActionResult> OnPostSubmitRegistrationAsync()
-        {
-            Request.QueryString = QueryString.Empty;
-            ShowIndex = false;
-            if (!ModelState.IsValid)
-            {
-                ShowRegistrationForm = true;
-                ShowDownloads = false;
-                PageResult page = Page();
-                return page;
-            }
-
-            try
-            {
-                Email = RegistrationDetails.Email;
-                logger.LogDebug($"Adding new registration to registrations DB...");
-                controller.Register(RegistrationDetails);
-
-                if (Subscribe)
-                {
-                    logger.LogDebug("Subscribing to mailing list...");
-                    controller.Subscribe(RegistrationDetails.Email);
-                }
-
-                logger.LogDebug("Sending registration email...");
-                await SendRegistrationEmail();
-
-                if (RegistrationDetails.LicenceType == LicenceType.Commercial)
-                {
-                    logger.LogDebug($"Sending invoice email...");
-                    await SendInvoiceEmail();
-                }
-            }
-            catch (Exception err)
-            {
-                logger.LogError(err, $"An error occurred while performing registration");
-            }
-
-            HttpContext.Session.SetString(emailCookieName, Email);
-            ShowRegistrationForm = false;
-            ShowDownloads = true;
-            PageResult result = Page();
-            return result;
-        }
-
-        /// <summary>
-        /// Check if the given email address has an active registration
-        /// associated with it. If so, display the downloads page. If not,
-        /// display the registration page.
-        /// </summary>
-        /// <param name="email">The email address to be checked.</param>
-        private void CheckIsRegistered(string email)
-        {
-            if (string.IsNullOrEmpty(email))
-                ShowIndex = true;
-            else
-            {
-                ShowIndex = false;
-                HttpContext.Session.SetString(emailCookieName, email);
-                try
-                {
-                    ShowRegistrationForm = !controller.IsRegistered(email).Value;
-                }
-                catch (Exception error)
-                {
-                    ShowRegistrationForm = true;
-                    logger.LogError(error, "Encountered an error while checking if user is registered");
-                }
-
-                if (ShowRegistrationForm)
-                {
-                    RegistrationDetails.Email = email;
-                    OnGetRegister();
-                }
-                else
-                    ShowDownloads = true;
-            }
-        }
-
-        public void OnGetRegister()
-        {
-            ShowIndex = false;
-            ShowDownloads = false;
-            ShowRegistrationForm = true;
-            RegistrationDetails = new Models.Registration();
-            RegistrationDetails.Product = apsimName;
-            RegistrationDetails.Version = versionNameLatest;
-            RegistrationDetails.Platform = "Windows";
-            RegistrationDetails.LicenceType = LicenceType.NonCommercial;
-            RegistrationDetails.Country = "Australia";
-        }
-
         /// <summary>
         /// Get all apsoil versions available for download.
         /// </summary>
@@ -274,9 +316,11 @@ namespace APSIM.Registration.Pages
         /// Get all available versions of old apsim.
         /// </summary>
         /// <param name="n">Maximum number of versions to return.</param>
-        private static List<ProductVersion> GetApsimClassicUpgrades(int n)
+        private List<ProductVersion> GetApsimClassicUpgrades(int n)
         {
-            if (n <= 0)
+            // If version filter is provided, fetch all available versions from
+            // builds API.
+            if (n <= 0 || !string.IsNullOrEmpty(versionFilter))
                 n = 1000; // fixme
 
             List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"http://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetReleases?numRows={n}");
@@ -292,6 +336,9 @@ namespace APSIM.Registration.Pages
             result.AddRange(GetStaticApsimClassicVersions());
             if (result.Count > n)
                 result = result.Take(n).ToList();
+
+            if (!string.IsNullOrEmpty(versionFilter))
+                result = result.Where(v => v.Number.Contains(versionFilter)).ToList();
 
             return result;
         }
@@ -321,10 +368,21 @@ namespace APSIM.Registration.Pages
         /// Get all available apsim versions.
         /// </summary>
         /// <param name="n">Maximum number of versions to return.</param>
-        private static List<ProductVersion> GetApsimXUpgrades(int n)
+        private List<ProductVersion> GetApsimXUpgrades(int n)
         {
+            // If searching for a particular version, remove limiter on number
+            // of rows. Ultimately it would be better if there were a search
+            // endpoint on the builds API.
+            if (!string.IsNullOrEmpty(versionFilter))
+                n = 0;
+
             List<Upgrade> upgrades = WebUtilities.CallRESTService<List<Upgrade>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/Builds.svc/GetLastNUpgrades?n={n}");
-            return upgrades.Select(u => new ProductVersion(u)).ToList();
+            List<ProductVersion> versions = upgrades.Select(u => new ProductVersion(u)).ToList();
+
+            if (!string.IsNullOrEmpty(versionFilter))
+                versions = versions.Where(v => v.Number.Contains(versionFilter, StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+            return versions;
         }
 
         /// <summary>
@@ -395,7 +453,7 @@ namespace APSIM.Registration.Pages
         /// <summary>
         /// Get an email body for the given registration details.
         /// </summary>
-        private static async Task<string> GetEmailBody(LicenceType license, string productName, string versionName, string platform)
+        private async Task<string> GetEmailBody(LicenceType license, string productName, string versionName, string platform)
         {
             bool commercial = license == LicenceType.Commercial;
             string mailBodyFile = commercial ? commercialEmailBody : nonCommercialEmailBody;
@@ -466,7 +524,7 @@ namespace APSIM.Registration.Pages
         /// Find a product with the given name. Throw if not found.
         /// </summary>
         /// <param name="product">Name of the product.</param>
-        private static Product GetProduct(string productName)
+        private Product GetProduct(string productName)
         {
             Product product = Products.FirstOrDefault(p => p.Name == productName);
             if (product == null)
@@ -501,6 +559,26 @@ namespace APSIM.Registration.Pages
             msg.Append("</p>");
             return msg.ToString();
             */
+        }
+
+        public Organisation FindAIMember(string email)
+        {
+            email = email.Trim();
+            return AiMembers.FirstOrDefault(m => email.EndsWith(m.DomainName, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        /// <summary>
+        /// Check if an email address belongs to a member of the APSIM Initiative.
+        /// </summary>
+        /// <param name="email">Email address to be checked.</param>
+        public bool IsAIMember(string email)
+        {
+            return FindAIMember(email) != null;
+        }
+
+        public string SubmitButtonText()
+        {
+            return IsAIMember(RegistrationDetails.Email) ? "Submit" : "I agree to the T&Cs below. Proceed to Downloads";
         }
 
         private static int GetClassicVersionNumber(ProductVersion version)

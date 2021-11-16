@@ -83,10 +83,7 @@ namespace APSIM.Registration.Controllers
             try
             {
                 using (IRegistrationsDbContext context = dbContextGenerator.Generate())
-                {
-                    Func<Models.Registration, bool> isMatch = r => r.Email.Equals(email, StringComparison.InvariantCultureIgnoreCase);
-                    return context.Registrations.Any(isMatch);
-                }
+                    return context.Registrations.Any(r => r.Email == email);
             }
             catch (Exception error)
             {

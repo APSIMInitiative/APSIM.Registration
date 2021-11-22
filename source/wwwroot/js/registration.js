@@ -55,7 +55,9 @@ function onProductChanged() {
     // (This allows them to select historical major releases such as 7.9).
     // Otherwise, hide the version selector.
     $('#version-selector option').each(function() { $(this).hide(); });
-    $(`#version-selector option.${product}`).each(function() {
+    $('#version-selector option.latest-version').each(function() { $(this).show(); });
+    var productClass = product.replaceAll(' ', '');
+    $(`#version-selector option.${productClass}`).each(function() {
         $(this).show();
     });
 }

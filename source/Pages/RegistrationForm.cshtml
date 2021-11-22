@@ -27,12 +27,12 @@
                     <td class="property-name-cell">Version:</td>
                     <td class="table-input-cell">
                         <select id="version-selector" asp-for="RegistrationDetails.Version">
-                            <option value="Latest">Latest</option>
+                            <option class="latest-version" value="Latest">Latest</option>
                             @foreach (Product product in IndexModel.Products)
                             {
                                 @foreach (ProductVersion version in product.Versions)
                                 {
-                                    <option class="@product.Name" value="@version.Number">@version.Number</option>
+                                    <option class="@product.Name.Replace(" ", "")" value="@version.Number">@version.Number</option>
                                 }
                             }
                         </select>

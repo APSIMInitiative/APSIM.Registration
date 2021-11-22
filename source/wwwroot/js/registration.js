@@ -54,12 +54,10 @@ function onProductChanged() {
     // If user has selected old apsim, show the version dropdown.
     // (This allows them to select historical major releases such as 7.9).
     // Otherwise, hide the version selector.
-    if ($('#version-selector').length) {
-        $('#version-selector option').each(function() { $(this).hide(); });
-        $(`#version-selector option.${product}`).each(function() {
-            $(this).show();
-        });
-    }
+    $('#version-selector option').each(function() { $(this).hide(); });
+    $(`#version-selector option.${product}`).each(function() {
+        $(this).show();
+    });
 }
 
 // Update the licence text depending on the selected product and

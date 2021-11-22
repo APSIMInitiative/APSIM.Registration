@@ -106,6 +106,11 @@ namespace APSIM.Registration.Pages
         public string VersionFilter { get; private set; }
 
         /// <summary>
+        /// Product filter for versions to be displayed to the user.
+        /// </summary>
+        public string ProductFilter { get; private set; }
+
+        /// <summary>
         /// Create a new <see cref="RegisterModel"/> instance.
         /// </summary>
         /// <param name="context">The registrations database context.</param>
@@ -195,6 +200,10 @@ namespace APSIM.Registration.Pages
             email = SaveToSession(email, emailCookieName);
             if (!string.IsNullOrEmpty(version))
                 VersionFilter = version;
+            if (!string.IsNullOrEmpty(product))
+                ProductFilter = product;
+            else
+                ProductFilter = apsimName;
 
             // If we're here from the registration form, perform the registration.
             if (Sender == View.RegistrationForm)

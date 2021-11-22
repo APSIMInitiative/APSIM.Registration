@@ -16,7 +16,7 @@
         <h1>APSIM Downloads</h1>
         <p>
             Product: 
-            @Html.DropDownList("product-selector", IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name)))
+            <select id="product-selector" asp-for="ProductFilter" asp-items="IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
             <!-- Downloads Table -->
             <table id="tblDownloads">
                 <tr>
@@ -36,7 +36,7 @@
                     {
                         <tr class="@product.Name">
                             <td>@version.ReleaseDate.ToString("yyyy-MM-dd")</td>
-                            <td><a asp-page="Index" asp-route-version="@version.Number">@version.Number</a></td>
+                            <td><a asp-page="Index" asp-route-version="@version.Number" asp-route-product="@product.Name">@version.Number</a></td>
                             <td><a href="@version.InfoLink">@version.Description</a></td>
                             <td>
                                 <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Windows">Windows</a>

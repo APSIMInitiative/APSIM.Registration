@@ -36,7 +36,7 @@
                     {
                         <tr class="@product.Name">
                             <td>@version.ReleaseDate.ToString("yyyy-MM-dd")</td>
-                            <td>@version.Number</td>
+                            <td><a asp-page="Index" asp-route-version="@version.Number">@version.Number</a></td>
                             <td><a href="@version.InfoLink">@version.Description</a></td>
                             <td>
                                 <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Windows">Windows</a>

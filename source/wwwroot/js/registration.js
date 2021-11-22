@@ -1,20 +1,18 @@
-const productSelectorSelector = '#product-selector';
-const versionRowSelector = '#versionRow';
 const apsimName = "APSIM Next Generation";
 const oldApsimName = "APSIM Classic";
-const apsoilName = "Apsoil";
 const commercialLicenceName = "Commercial";
 const nonCommercialLicenceName = "Non-Commercial";
 
 $(document).ready(function () {
     $('#dropDownLicenseType').change(onLicenseTypeChanged);
     $('#Product').change(onProductChanged);
-    $(productSelectorSelector).change(onDownloadProductChanged);
     onLicenseTypeChanged();
     onProductChanged();
-    onDownloadProductChanged();
 });
 
+// Called when the licence-type dropdown on the registration page
+// is changed. Updates the contents of the licence iframe and also
+// hides/shows any inputs which are specific to that licence type.
 function onLicenseTypeChanged() {
     // The options for commercial users should only be visible
     // when the commercial license type radio button is checked.
@@ -33,21 +31,9 @@ function onLicenseTypeChanged() {
     }
 }
 
-function onDownloadProductChanged() {
-    var product = $(productSelectorSelector).find('option:selected').text();
-    $('#tblDownloads tr').each(function() {
-        if (this.className == product) {
-            $(this).show();
-        } else {
-            $(this).hide();
-        }
-    });
-    $('#tblDownloads tr:first').show();
-}
-
-
 // This is called when the user changes the selected product on the
-// registration page.
+// registration page. Shows/hides the platform dropdown, depending
+// on whether the selected product supports multiple platforms.
 function onProductChanged() {
     // Need to update license info and hide the row containing version
     // selection if apsoil is selected.
@@ -68,14 +54,16 @@ function onProductChanged() {
     // If user has selected old apsim, show the version dropdown.
     // (This allows them to select historical major releases such as 7.9).
     // Otherwise, hide the version selector.
-    if (product == oldApsimName) {
-        $(versionRowSelector).show();
-    } else {
-        $(versionRowSelector).hide();
-        $(versionRowSelector).prop('selectedIndex', 0);
+    if ($('#version-selector').length) {
+        $('#version-selector option').each(function() { $(this).hide(); });
+        $(`#version-selector option.${product}`).each(function() {
+            $(this).show();
+        });
     }
 }
 
+// Update the licence text depending on the selected product and
+// licence type.
 function updateLicense() {
     var product = $('#Product').find('option:selected').text();
     var src = '';

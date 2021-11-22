@@ -46,7 +46,12 @@ namespace APSIM.Registration.Pages
 
         static IndexModel()
         {
-            products  = new List<Product>()
+            UpdateProducts();
+        }
+
+        internal static void UpdateProducts()
+        {
+            Products = new List<Product>()
             {
                 new Product(apsimName, GetAllApsimXUpgrades()),
                 new Product(oldApsimName, GetApsimClassicUpgrades()),
@@ -54,9 +59,7 @@ namespace APSIM.Registration.Pages
             };
         }
 
-        private static readonly IReadOnlyList<Product> products;
-
-        public static IReadOnlyList<Product> Products { get => products; }
+        public static IReadOnlyList<Product> Products { get; private set; }
 
         public enum View
         {

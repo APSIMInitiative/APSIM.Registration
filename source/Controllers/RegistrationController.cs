@@ -74,6 +74,26 @@ namespace APSIM.Registration.Controllers
         }
 
         /// <summary>
+        /// Update cached product versions used by the downloads
+        /// webpage. This is called by the APSIM.Builds API,
+        /// but should ultimately disappear as a public endpoint
+        /// when APSIM.Builds is refactored into this project.
+        /// </summary>
+        [HttpGet("updateproducts")]
+        public ActionResult Update()
+        {
+            try
+            {
+                APSIM.Registration.Pages.IndexModel.UpdateProducts();
+                return Ok();
+            }
+            catch (Exception error)
+            {
+                return HandleError(error);
+            }
+        }
+
+        /// <summary>
         /// Check if a user with a given email address has previously
         /// accepted the licence terms and conditions.
         /// </summary>

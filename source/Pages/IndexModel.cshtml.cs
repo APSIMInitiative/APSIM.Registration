@@ -262,6 +262,19 @@ namespace APSIM.Registration.Pages
         }
 
         /// <summary>
+        /// Handler for /register endpoint. This will delete the email cookie
+        /// and return a redirect to the current page, allowing a user to re-
+        /// register, or register with another email address.
+        /// </summary>
+#pragma warning disable 1998
+        public async Task<ActionResult> OnGetRegisterAsync()
+#pragma warning restore 1998
+        {
+            HttpContext.Response.Cookies.Delete(emailCookieName, cookieOptions);
+            return RedirectToPage();
+        }
+
+        /// <summary>
         /// Handler for POST requests to the Submit endpoint. This is called
         /// when the user clicks 'submit' on the registration form.
         /// </summary>

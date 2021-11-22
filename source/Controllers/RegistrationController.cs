@@ -103,8 +103,11 @@ namespace APSIM.Registration.Controllers
         {
             try
             {
-                using (IRegistrationsDbContext context = dbContextGenerator.Generate())
-                    return context.Registrations.Any(r => r.Email == email);
+                IEnumerable<Models.Registration> registrations = GetRegistrations(email);
+
+                // Registrations expire every 3 years.
+                int days = 365 * 3;
+                return registrations.Reverse().Any(r => (DateTime.Now - r.Date).TotalDays < days);
             }
             catch (Exception error)
             {
@@ -155,6 +158,12 @@ namespace APSIM.Registration.Controllers
             {
                 return HandleError(error);
             }
+        }
+
+        private IEnumerable<Models.Registration> GetRegistrations(string email)
+        {
+            using (IRegistrationsDbContext context = dbContextGenerator.Generate())
+                return context.Registrations.Where(r => r.Email == email).ToList();
         }
 
         /// <summary>

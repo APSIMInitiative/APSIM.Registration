@@ -3,7 +3,7 @@ Description=APSIM.Registration Web Services
 
 [Service]
 WorkingDirectory=/var/www/APSIM.Registration
-ExecStart=/var/www/APSIM.Registration/APSIM.Registration --urls "http://localhost:5000;https://localhost:5001"
+ExecStart=/var/www/APSIM.Registration/APSIM.Registration --urls "http://localhost:5000"
 Restart=always
 # Restart service after 10 seconds if the dotnet service crashes:
 RestartSec=10

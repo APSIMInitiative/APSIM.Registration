@@ -1,0 +1,29 @@
+td.table-input-cell * {
+    width: 400px;
+}
+td.property-name-cell {
+    width: 200px;
+}
+#tblDownloads {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+#tblDownloads th, #tblDownloads td {
+    padding: 5px 5px;
+}
+#tblDownloads tr:nth-child(odd) {
+    background-color: #eee;
+}
+a {
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+#terms {
+    margin-top: 1em;
+}
+#subscribeArea {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

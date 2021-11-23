@@ -1,0 +1,134 @@
+@namespace APSIM.Registration.Pages
+@using Models
+@addTagHelper *,Microsoft.AspNetCore.Mvc.TagHelpers
+@model IndexModel
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>APSIM Initiative Product Registration</title>
+        <link rel="stylesheet" href="~/css/site.css" />
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+        <script type="text/javascript" src="~/js/registration.js"></script>
+    </head>
+    <body>
+        <h1>APSIM Initiative Product Registration</h1>
+        <form method="post">
+            <table>
+                <tr>
+                    <td class="property-name-cell">Product:</td>
+                    <td class="table-input-cell">
+                        @* <input type="text" asp-for="RegistrationDetails.Product"> *@
+                        <select id="Product" asp-for="RegistrationDetails.Product" asp-items="@IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Product"></span></td>
+                </tr>
+                <tr id="versionRow">
+                    <td class="property-name-cell">Version:</td>
+                    <td class="table-input-cell">
+                        <select id="version-selector" asp-for="RegistrationDetails.Version">
+                            <option class="latest-version" value="Latest">Latest</option>
+                            @foreach (Product product in IndexModel.Products)
+                            {
+                                @foreach (ProductVersion version in product.Versions)
+                                {
+                                    <option class="@product.Name.Replace(" ", "")" value="@version.Number">@version.Number</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Version"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Platform:</td>
+                    <td class="table-input-cell">
+                        <select id="platform-selector" asp-for="RegistrationDetails.Platform">
+                            <option id="platformWindows" value="Windows">Windows</option>
+                            <option id="platformMacOS" value="MacOS">MacOS</option>
+                            <option id="platformLinux" value="Linux">Linux</option>
+                        </select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Platform"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">First Name:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.FirstName"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.FirstName"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Last Name:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.LastName"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.LastName"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Organisation:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Organisation"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Organisation"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Country:</td>
+                    <td class="table-input-cell">
+                        <select asp-for="RegistrationDetails.Country" asp-items="@ISO3166.Country.List.Select(c => new SelectListItem(c.Name, c.Name))"></select>
+                    </td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.Country"></span></td>
+                </tr>
+                <tr>
+                    <td class="property-name-cell">Email:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.Email"></td>
+                    <td><span asp-validation-for="RegistrationDetails.Email"></span></td>
+                </tr>
+                @if (!Model.IsAIMember(Model.RegistrationDetails.Email))
+                {
+                <tr>
+                    <td class="property-name-cell">Licence Type:</td>
+                    <td class="table-input-cell"><select id="dropDownLicenseType" asp-for="RegistrationDetails.LicenceType" asp-items="Html.GetEnumSelectList<LicenceType>()"></select></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.LicenceType"></span></td>
+                </tr>
+                <tr class="commercialInput">
+                    <td class="property-name-cell">Licensor Name:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.LicensorName"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.LicensorName"></span></td>
+                </tr>
+                <tr class="commercialInput">
+                    <td class="property-name-cell">Licensor Email:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.LicensorEmail"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.LicensorEmail"></span></td>
+                </tr>
+                <tr class="commercialInput">
+                    <td class="property-name-cell">Company Turnover:</td>
+                    <td class="table-input-cell"><select asp-for="RegistrationDetails.CompanyTurnover" asp-items="Html.GetEnumSelectList<Turnover>()"></select></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.CompanyTurnover"></span></td>
+                </tr>
+                <tr class="commercialInput">
+                    <td class="property-name-cell">Company Registration:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.CompanyRego"></td>
+                    <td><span class="error" asp-validation-for="RegistrationDetails.CompanyRego"></span></td>
+                </tr>
+                <tr class="commercialInput">
+                    <td class="property-name-cell">Company Address:</td>
+                    <td class="table-input-cell"><input type="text" asp-for="RegistrationDetails.CompanyAddress"></td>
+                </tr>
+                }
+                <tr>
+                    <td class="table-input-cell"><input type="hidden" asp-for="RegistrationDetails.Type" value="Registration"></td>
+                </tr>
+            </table>
+            <div id="subscribeArea">
+                <label>
+                    <input name="doSubscribe" asp-for="Subscribe">
+                    The APSIM Initiative will forward updates on APSIM-related developments and improvements as well as the upcoming APSIM-related events including training workshops.
+                </label>
+            </div>
+            <input type="hidden" asp-for="Sender" value="RegistrationForm">
+            <input type="submit" value="@Model.SubmitButtonText()">
+        </form>
+        @if (!Model.IsAIMember(Model.RegistrationDetails.Email))
+        {
+        <iframe id="terms" height="300px" width="700px" src="~/html/APSIM_NonCommercial_RD_Licence.htm" />
+        }
+@if (!string.IsNullOrEmpty(Model.VersionFilter))
+{
+    <p>You have selected version @Model.VersionFilter.</p>
+}
+    </body>
+</html>

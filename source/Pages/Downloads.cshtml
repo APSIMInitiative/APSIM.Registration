@@ -1,0 +1,69 @@
+@namespace APSIM.Registration.Pages
+@using Models
+@addTagHelper *,Microsoft.AspNetCore.Mvc.TagHelpers
+@model IndexModel
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>APSIM Downloads</title>
+        <link rel="stylesheet" href="~/css/site.css" />
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+        <script type="text/javascript" src="~/js/downloads.js"></script>
+    </head>
+    <body>
+        <input type="hidden" name="Sender" value="Downloads">
+        <h1>APSIM Downloads</h1>
+        <p>
+            Product: 
+            <select id="product-selector" asp-for="ProductFilter" asp-items="IndexModel.Products.Select(p => new SelectListItem(p.Name, p.Name))"></select>
+            <!-- Downloads Table -->
+            <table id="tblDownloads">
+                <tr>
+                    <th>Release Date</th>
+                    <th>Release Number</th>
+                    <th>Release Information</th>
+                    <th>Download Link</th>
+                </tr>
+                @foreach (Product product in IndexModel.Products)
+                {
+                    IEnumerable<ProductVersion> products = product.Versions;
+                    if (!string.IsNullOrEmpty(Model.VersionFilter))
+                        products = products.Where(p => p.Number.Contains(Model.VersionFilter, StringComparison.CurrentCultureIgnoreCase));
+                    if (Model.NumDownloads > 0)
+                        products = products.Take(Model.NumDownloads);
+                    foreach (ProductVersion version in products)
+                    {
+                        <tr class="@product.Name">
+                            <td>@version.ReleaseDate.ToString("yyyy-MM-dd")</td>
+                            <td><a asp-page="Index" asp-route-version="@version.Number" asp-route-product="@product.Name">@version.Number</a></td>
+                            <td><a href="@version.InfoLink">@version.Description</a></td>
+                            <td>
+                                <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Windows">Windows</a>
+                                @if (!string.IsNullOrEmpty(version.DownloadLinkMac))
+                                {
+                                    @:,&nbsp;
+                                    <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="MacOS">MacOS</a>
+                                }
+                                @if (!string.IsNullOrEmpty(version.DownloadLinkLinux))
+                                {
+                                    @:,&nbsp;
+                                    <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Linux">Linux</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+            <form method="post">
+                Max number of rows:&nbsp;<input asp-for="NumDownloads">
+                <input type="submit" value="Go">
+            </form>
+        </p>
+        <footer>
+            <p>
+                You currently have a non-commercial license for APSIM. If you are using APSIM commercially, you will need to <a href="/register">register again</a>.
+            </p>
+        </footer>
+    </body>
+</html>

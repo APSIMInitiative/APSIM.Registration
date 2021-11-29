@@ -37,6 +37,11 @@ namespace APSIM.Registration.Models
         public string ReleaseURL { get; set; }
 
         /// <summary>
+        /// Revision number.
+        /// </summary>
+        public uint RevisionNumber { get; set; }
+
+        /// <summary>
         /// Issue Number (obsolete).
         /// </summary>
         // Leaving this here for compatibility reasons.

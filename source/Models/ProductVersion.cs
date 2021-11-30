@@ -68,7 +68,7 @@ namespace APSIM.Registration.Models
         {
             Description = upgrade.IssueTitle;
             // fixme - the version number deduction is a bit of a hack.
-            Number = upgrade.ReleaseDate.ToString("yyyy.MM.dd.") + upgrade.IssueNumber;
+            Number = $"{upgrade.ReleaseDate:yyyy.MM}.{upgrade.RevisionNumber}";
             InfoLink = upgrade.IssueURL;
             ReleaseDate = upgrade.ReleaseDate;
             DownloadLinkWindows = upgrade.ReleaseURL;

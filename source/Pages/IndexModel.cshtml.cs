@@ -270,8 +270,8 @@ namespace APSIM.Registration.Pages
         public async Task<ActionResult> OnGetRegisterAsync()
 #pragma warning restore 1998
         {
-            HttpContext.Response.Cookies.Delete(emailCookieName, cookieOptions);
-            return RedirectToPage();
+            HttpContext.Request.Cookies.TryGetValue(emailCookieName, out string email);
+            return RegistrationForm(email);
         }
 
         /// <summary>
@@ -602,6 +602,8 @@ namespace APSIM.Registration.Pages
 
         public Organisation FindAIMember(string email)
         {
+            if (string.IsNullOrEmpty(email))
+                return null;
             email = email.Trim();
             return AiMembers.FirstOrDefault(m => email.EndsWith(m.DomainName, StringComparison.CurrentCultureIgnoreCase));
         }

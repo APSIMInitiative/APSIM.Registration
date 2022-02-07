@@ -59,7 +59,7 @@ namespace APSIM.Registration
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "APSIM.Registration.Service v1"));
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             app.UseSession();

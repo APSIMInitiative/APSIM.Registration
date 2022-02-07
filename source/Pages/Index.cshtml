@@ -10,12 +10,11 @@
         <title>APSIM Registration System</title>
         <link rel="stylesheet" href="~/css/site.css" />
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
-        <script type="text/javascript" src="~/js/registration.js"></script>
     </head>
     <body>
         <h1>APSIM Registration System</h1>
         <form method="post">
-            <input type="hidden" asp-for="Sender" value="LandingPage">
+            <input type="hidden" name="Sender" value="LandingPage">
             Email: <input type="text" name="email">
             <input type="submit" value="Go">
         </form>

@@ -1,61 +1,81 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace APSIM.Registration.Models
 {
     /// <summary>
-    /// An class encapsulating an upgrade 
+    /// Encapsulates an Apsim next gen release.
     /// </summary>
-    public class Upgrade
+    public class Release
     {
         /// <summary>
-        /// Release date of the upgrade.
+        /// Create a new <see cref="Release"/> instance.
         /// </summary>
-        public DateTime ReleaseDate { get; set; }
-
-        /// <summary>
-        /// Number/ID of the issue addressed by this upgrade.
-        /// </summary>
-        public int IssueNumber { get; set; }
-
-        /// <summary>
-        /// Title of the issue addressed by this upgrade.
-        /// </summary>
-        public string IssueTitle { get; set; }
-
-        /// <summary>
-        /// URL of the issue addressed by this upgrade.
-        /// </summary>
-        public string IssueURL { get; set; }
-
-        /// <summary>
-        /// URL of the installer for this upgrade.
-        /// </summary>
-        public string ReleaseURL { get; set; }
-
-        /// <summary>
-        /// Revision number.
-        /// </summary>
-        public uint RevisionNumber { get; set; }
-
-        /// <summary>
-        /// Issue Number (obsolete).
-        /// </summary>
-        // Leaving this here for compatibility reasons.
-        [Obsolete("Deprecated in favour of IssueNumber.")]
-        public int issueNumber
+        /// <param name="releaseDate">Release date.</param>
+        /// <param name="issue">Issue number addressed by this release.</param>
+        /// <param name="title">Release title/description.</param>
+        /// <param name="downloadLinkDebian">Download link for debian installer.</param>
+        /// <param name="downloadLinkWindows">Download link for windows installer.</param>
+        /// <param name="downloadLinkMacOS">Download linke for macOS installer.</param>
+        /// <param name="infoUrl">Link to more info about the release.</param>
+        /// <param name="version">Full version number of the release.</param>
+        /// <param name="revision">Revision number of the release.</param>
+        public Release(DateTime releaseDate, uint issue, string title, string downloadLinkDebian, string downloadLinkWindows, string downloadLinkMacOS, string infoUrl, string version, uint revision)
         {
-            get
-            {
-                return IssueNumber;
-            }
-            set
-            {
-                IssueNumber = value;
-            }
+            ReleaseDate = releaseDate;
+            Issue = issue;
+            Title = title;
+            DownloadLinkDebian = downloadLinkDebian;
+            DownloadLinkWindows = downloadLinkWindows;
+            DownloadLinkMacOS = downloadLinkMacOS;
+            InfoUrl = infoUrl;
+            Version = version;
+            Revision = revision;
         }
+
+        /// <summary>
+        /// Release date.
+        /// </summary>
+        public DateTime ReleaseDate { get; private init; }
+
+        /// <summary>
+        /// Issue number/ID.
+        /// </summary>
+        public uint Issue { get; private init; }
+
+        /// <summary>
+        /// Release title.
+        /// </summary>
+        public string Title { get; private init; }
+
+        /// <summary>
+        /// Download link for Debian installer.
+        /// </summary>
+        public string DownloadLinkDebian { get; private init; }
+
+        /// <summary>
+        /// Download link for windows installer.
+        /// </summary>
+        public string DownloadLinkWindows { get; private init; }
+
+        /// <summary>
+        /// Download link for macOS installer.
+        /// </summary>
+        public string DownloadLinkMacOS { get; private init; }
+
+        /// <summary>
+        /// URL of release info (the github issue addressed by the release).
+        /// </summary>
+        public string InfoUrl { get; set; }
+
+        /// <summary>
+        /// Version number.
+        /// </summary>
+        public string Version { get; private init; }
+
+        /// <summary>
+        /// Revision number (this is included in the version number).
+        /// </summary>
+        /// <value></value>
+        public uint Revision { get; private init; }
     }
 }

@@ -23,6 +23,7 @@ namespace APSIM.Registration.Pages
 {
     public class IndexModel : PageModel
     {
+        private const string buildsApi = "https://builds.apsim.info";
         private const string apsimName = "APSIM Next Generation";
         private const string oldApsimName = "APSIM Classic";
         private const string apsoilName = "Apsoil";
@@ -417,13 +418,10 @@ namespace APSIM.Registration.Pages
         /// </summary>
         private static IReadOnlyList<ProductVersion> GetAllApsimXUpgrades()
         {
-            List<Upgrade> upgrades = WebUtilities.CallRESTService<List<Upgrade>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/Builds.svc/GetLastNUpgrades");
-            return upgrades.Select(u => new ProductVersion(u)).ToList();
-
-            // if (!string.IsNullOrEmpty(versionFilter))
-            //     versions = versions.Where(v => v.Number.Contains(versionFilter, StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            // return versions;
+            // todo: proper async all the way up
+            Task<List<Release>> releases = WebUtilities.PostAsync<List<Release>>($"{buildsApi}/api/nextgen/list");
+            releases.Wait();
+            return releases.Result.Select(u => new ProductVersion(u)).ToList();
         }
 
         /// <summary>

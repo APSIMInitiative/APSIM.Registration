@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace APSIM.Registration.Models
 {
@@ -64,16 +63,20 @@ namespace APSIM.Registration.Models
             DownloadLinkMac = macUrl;
         }
 
-        public ProductVersion(Upgrade upgrade)
+        /// <summary>
+        /// Create a new <see cref="ProductVersion"/> instance using the data
+        /// from the specified release object returned from the builds API.
+        /// </summary>
+        /// <param name="release">The release instance.</param>
+        public ProductVersion(Release release)
         {
-            Description = upgrade.IssueTitle;
-            // fixme - the version number deduction is a bit of a hack.
-            Number = $"{upgrade.ReleaseDate:yyyy.MM}.{upgrade.RevisionNumber}";
-            InfoLink = upgrade.IssueURL;
-            ReleaseDate = upgrade.ReleaseDate;
-            DownloadLinkWindows = upgrade.ReleaseURL;
-            DownloadLinkLinux = Path.ChangeExtension(upgrade.ReleaseURL, ".deb"); //fixme
-            DownloadLinkMac = Path.ChangeExtension(upgrade.ReleaseURL, ".dmg");
+            Description = release.Title;
+            Number = release.Version;
+            InfoLink = release.InfoUrl;
+            ReleaseDate = release.ReleaseDate;
+            DownloadLinkWindows = release.DownloadLinkWindows;
+            DownloadLinkLinux = release.DownloadLinkDebian;
+            DownloadLinkMac = release.DownloadLinkMacOS;
         }
     }
 }

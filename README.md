@@ -16,6 +16,6 @@ CREATE DATABASE APSIM_Registrations;
 GRANT ALL PRIVILEGES ON APSIM_Registrations.* TO 'rego'@'localhost';
 ```
 
-## Deploy Changes to the website
+## Updating the website
 
-Run the deploy script at the root of the repository.
+See the instructions [here](https://github.com/hol430/apsim-notes/blob/master/REGISTRATION.md).

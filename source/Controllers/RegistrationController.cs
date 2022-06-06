@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using APSIM.Registration.Models;
 using APSIM.Registration.Data;
+using System.Text;
 
 namespace APSIM.Registration.Controllers
 {
@@ -66,6 +67,67 @@ namespace APSIM.Registration.Controllers
                     context.SaveChanges();
                 }
                 return Ok();
+            }
+            catch (Exception error)
+            {
+                return HandleError(error);
+            }
+        }
+
+        /// <summary>
+        /// Return a list of registrations as a CSV string.
+        /// </summary>
+        /// <param name="key">The token.</param>
+        [HttpGet("getallregistrations")]
+        public ActionResult<string> GetAllRegistrations(string token)
+        {
+            try
+            {
+                string validToken = Environment.GetEnvironmentVariable("REGISTRATION_TOKEN");
+                if (validToken == token)
+                {
+                    var stringBuilder = new StringBuilder();
+                    stringBuilder.AppendLine("Date,FirstName,LastName,Organisation,Country,Email,Product,Version,Platform,Type,LicenceType,LicensorName,LicensorEmail,CompanyTurnover,CompanyRego,CompanyAddress");
+
+                    using IRegistrationsDbContext context = dbContextGenerator.Generate();
+                    foreach (var registration in context.Registrations)
+                    {
+                        stringBuilder.Append(registration.Date);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.FirstName);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.LastName);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Organisation);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Country);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Email);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Product);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Version);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Platform);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.Type);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.LicenceType);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.LicensorName);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.LicensorEmail);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.CompanyTurnover);
+                        stringBuilder.Append(',');
+                        stringBuilder.Append(registration.CompanyRego);
+                        stringBuilder.Append(',');
+                        stringBuilder.AppendLine(registration.CompanyAddress);
+                    }
+                    return stringBuilder.ToString();
+                }
+                else
+                    throw new Exception("Missing or invalid token");
             }
             catch (Exception error)
             {

@@ -125,8 +125,8 @@ namespace APSIM.Registration.Controllers
                         stringBuilder.Append("\",\"");
                         stringBuilder.Append(registration.CompanyRego);
                         stringBuilder.Append("\",\"");
-                        stringBuilder.AppendLine(registration.CompanyAddress);
-                        stringBuilder.Append("\"");
+                        stringBuilder.Append(registration.CompanyAddress);
+                        stringBuilder.AppendLine("\"");
                     }
                     return stringBuilder.ToString();
                 }

@@ -94,39 +94,37 @@ namespace APSIM.Registration.Controllers
                     using IRegistrationsDbContext context = dbContextGenerator.Generate();
                     foreach (var registration in context.Registrations)
                     {
-                        stringBuilder.Append("\"");
-                        stringBuilder.Append(registration.Date.ToString("yyyy-MM-dd"));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.FirstName.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LastName.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Organisation.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Country.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Email);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Product);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Version);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Platform);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Type);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LicenceType);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LicensorName.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LicensorEmail);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.CompanyTurnover);
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.CompanyRego.Replace("\"", ""));
-                        stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.CompanyAddress.Replace("\"", ""));
-                        stringBuilder.AppendLine("\"");
+                        stringBuilder.Append(SanitiseValue(registration.Date.ToString("yyyy-MM-dd")));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.FirstName));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.LastName));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Organisation));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Country));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Email));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Product));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Version));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Platform));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.Type));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.LicenceType.ToString()));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.LicensorName));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.LicensorEmail));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.CompanyTurnover));
+                        stringBuilder.Append(",");
+                        stringBuilder.Append(SanitiseValue(registration.CompanyRego));
+                        stringBuilder.Append(",");
+                        stringBuilder.AppendLine(SanitiseValue(registration.CompanyAddress));
                     }
                     return stringBuilder.ToString();
                 }
@@ -137,6 +135,19 @@ namespace APSIM.Registration.Controllers
             {
                 return HandleError(error);
             }
+        }
+
+        /// <summary>
+        /// Remove double quotes from value and wrap the value in double quotes.
+        /// </summary>
+        /// <param name="value">The string value.</param>
+        private string SanitiseValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                value = string.Empty;
+            else
+                value = value.Replace("\"", "");
+            return $"\"{value}\"";
         }
 
         /// <summary>

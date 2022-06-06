@@ -95,15 +95,15 @@ namespace APSIM.Registration.Controllers
                     foreach (var registration in context.Registrations)
                     {
                         stringBuilder.Append("\"");
-                        stringBuilder.Append(registration.Date);
+                        stringBuilder.Append(registration.Date.ToString("yyyy-MM-dd"));
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.FirstName);
+                        stringBuilder.Append(registration.FirstName.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LastName);
+                        stringBuilder.Append(registration.LastName.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Organisation);
+                        stringBuilder.Append(registration.Organisation.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.Country);
+                        stringBuilder.Append(registration.Country.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
                         stringBuilder.Append(registration.Email);
                         stringBuilder.Append("\",\"");
@@ -117,15 +117,15 @@ namespace APSIM.Registration.Controllers
                         stringBuilder.Append("\",\"");
                         stringBuilder.Append(registration.LicenceType);
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.LicensorName);
+                        stringBuilder.Append(registration.LicensorName.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
                         stringBuilder.Append(registration.LicensorEmail);
                         stringBuilder.Append("\",\"");
                         stringBuilder.Append(registration.CompanyTurnover);
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.CompanyRego);
+                        stringBuilder.Append(registration.CompanyRego.Replace("\"", ""));
                         stringBuilder.Append("\",\"");
-                        stringBuilder.Append(registration.CompanyAddress);
+                        stringBuilder.Append(registration.CompanyAddress.Replace("\"", ""));
                         stringBuilder.AppendLine("\"");
                     }
                     return stringBuilder.ToString();

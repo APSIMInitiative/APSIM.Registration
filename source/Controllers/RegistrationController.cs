@@ -94,37 +94,39 @@ namespace APSIM.Registration.Controllers
                     using IRegistrationsDbContext context = dbContextGenerator.Generate();
                     foreach (var registration in context.Registrations)
                     {
+                        stringBuilder.Append("\"");
                         stringBuilder.Append(registration.Date);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.FirstName);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.LastName);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Organisation);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Country);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Email);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Product);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Version);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Platform);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.Type);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.LicenceType);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.LicensorName);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.LicensorEmail);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.CompanyTurnover);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.Append(registration.CompanyRego);
-                        stringBuilder.Append(',');
+                        stringBuilder.Append("\",");
                         stringBuilder.AppendLine(registration.CompanyAddress);
+                        stringBuilder.Append("\"");
                     }
                     return stringBuilder.ToString();
                 }

@@ -84,6 +84,8 @@ namespace APSIM.Registration.Controllers
             try
             {
                 string validToken = Environment.GetEnvironmentVariable("REGISTRATION_TOKEN");
+                if (validToken == null)
+                    throw new Exception("Cannot find environment variable REGISTRATION_TOKEN");
                 if (validToken == token)
                 {
                     var stringBuilder = new StringBuilder();

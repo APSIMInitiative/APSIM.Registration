@@ -102,7 +102,7 @@ namespace APSIM.Registration.Controllers
                         stringBuilder.Append(",");
                         stringBuilder.Append(SanitiseValue(registration.Organisation));
                         stringBuilder.Append(",");
-                        stringBuilder.Append(SanitiseValue(registration.Country));
+                        stringBuilder.Append(SanitiseCountry(registration.Country));
                         stringBuilder.Append(",");
                         stringBuilder.Append(SanitiseValue(registration.Email));
                         stringBuilder.Append(",");
@@ -148,6 +148,22 @@ namespace APSIM.Registration.Controllers
             else
                 value = value.Replace("\"", "");
             return $"\"{value}\"";
+        }
+
+        /// <summary>
+        /// Remove double quotes from value and wrap the value in double quotes.
+        /// </summary>
+        /// <param name="country">The string value.</param>
+        private string SanitiseCountry(string country)
+        {
+            if (string.IsNullOrEmpty(country))
+                country = string.Empty;
+            else if (country == "Congo, Democratic Republic of the")
+                country = "Congo";
+            else if (country == "Kosovo")
+                country = "Serbia";
+
+            return SanitiseValue(country);
         }
 
         /// <summary>

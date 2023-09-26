@@ -18,4 +18,4 @@ GRANT ALL PRIVILEGES ON APSIM_Registrations.* TO 'rego'@'localhost';
 
 ## Updating the website
 
-See the instructions [here](https://github.com/hol430/apsim-notes/blob/master/REGISTRATION.md).
+See the instructions [here](https://github.com/APSIMInitiative/apsim-notes/blob/master/registration.md).

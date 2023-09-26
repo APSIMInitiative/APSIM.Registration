@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using APSIM.Registration.Data;
+using APSIM.Registration.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using APSIM.Registration.Models;
-using APSIM.Registration.Data;
-using System.Text;
 
 namespace APSIM.Registration.Controllers
 {
@@ -267,7 +267,7 @@ namespace APSIM.Registration.Controllers
         {
             Func<string, string, bool> areEqual = (s1, s2) => s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase);
             using (IRegistrationsDbContext context = dbContextGenerator.Generate())
-                return context.Registrations.Any(r => areEqual(r.Email, email) && r.LicenceType == LicenceType.Commercial);
+                return context.Registrations.Any(r => areEqual(r.Email, email) && r.LicenceType == LicenceType.SpecialUse);
         }
 
         /// <summary>

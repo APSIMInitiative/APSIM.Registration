@@ -1,23 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
+using APSIM.Registration.Controllers;
 using APSIM.Registration.Data;
+using APSIM.Registration.Models;
+using APSIM.Registration.Utilities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using APSIM.Registration.Models;
-using APSIM.Registration.Controllers;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using APSIM.Registration.Utilities;
-using ISO3166;
-using System.Net.Mail;
-using System.Net;
-using System.Text;
-using System.Reflection;
-using System.IO;
-using System.Net.Mime;
 
 namespace APSIM.Registration.Pages
 {
@@ -35,12 +33,12 @@ namespace APSIM.Registration.Pages
         private const string pdfMimeType = "application/pdf";
         private const string versionNameLatest = "Latest";
         private const string emailFromAddress = "no-reply@www.apsim.info";
-        private const string commercialEmailBody = "EmailBodyCommercial.html";
-        private const string nonCommercialEmailBody = "EmailBody.html";
+        private const string specialUseEmailBody = "EmailBodyCommercial.html";
+        private const string generalUseEmailBody = "EmailBody.html";
         private const string referencingGuideFileName = "referencing-guide.pdf";
         private const string referencingGuideAttachmentDisplayName = "Guide to Referencing APSIM in Publications.pdf";
-        private const string commercialLicencePdf = "APSIM_Commercial_Licence.pdf";
-        private const string nonCommercialLicencePdf ="APSIM_NonCommercial_RD_licence.pdf";
+        private const string specialUseLicencePdf = "APSIM_Special_Use_Licence.pdf";
+        private const string generalUseLicencePdf = "APSIM_General_Use_licence.pdf";
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
         private const string emailCookieName = "Email";
         public IReadOnlyList<Organisation> AiMembers { get; private init; }
@@ -150,7 +148,7 @@ namespace APSIM.Registration.Pages
             RegistrationDetails.Product = apsimName;
             RegistrationDetails.Version = versionNameLatest;
             RegistrationDetails.Platform = "Windows";
-            RegistrationDetails.LicenceType = LicenceType.NonCommercial;
+            RegistrationDetails.LicenceType = LicenceType.GeneralUse;
             RegistrationDetails.Country = "Australia";
             RegistrationDetails.Email = email;
             Organisation org = FindAIMember(RegistrationDetails.Email);
@@ -165,7 +163,7 @@ namespace APSIM.Registration.Pages
                     RegistrationDetails.Version = version.Number;
                 }
             }
-            
+
             return Partial("RegistrationForm", this);
         }
 
@@ -309,7 +307,7 @@ namespace APSIM.Registration.Pages
                 await SendRegistrationEmail();
 
                 // Send invoice email.
-                if (RegistrationDetails.LicenceType == LicenceType.Commercial)
+                if (RegistrationDetails.LicenceType == LicenceType.SpecialUse)
                 {
                     logger.LogDebug($"Sending invoice email...");
                     await SendInvoiceEmail();
@@ -436,11 +434,11 @@ namespace APSIM.Registration.Pages
 #else
             email.To.Add("apsim@csiro.au"); // prod
 #endif
-            email.Subject = "APSIM Commercial Registration Notification";
+            email.Subject = "APSIM Special Use Registration Notification";
             email.IsBodyHtml = true;
 
             StringBuilder body = new StringBuilder();
-            body.AppendLine("<p>This is an automated notification of an APSIM commercial license agreement.<p>");
+            body.AppendLine("<p>This is an automated notification of an APSIM Special Use license agreement.<p>");
             body.AppendLine("<table>");
             body.AppendLine($"<tr><td>Product</td><td>{RegistrationDetails.Product}</td>");
             body.AppendLine($"<tr><td>Version</td><td>{RegistrationDetails.Version}</td>");
@@ -494,8 +492,8 @@ namespace APSIM.Registration.Pages
         /// </summary>
         private async Task<string> GetEmailBody(LicenceType license, string productName, string versionName, string platform)
         {
-            bool commercial = license == LicenceType.Commercial;
-            string mailBodyFile = commercial ? commercialEmailBody : nonCommercialEmailBody;
+            bool commercial = license == LicenceType.SpecialUse;
+            string mailBodyFile = commercial ? specialUseEmailBody : generalUseEmailBody;
             string body = await ReadResourceFile(mailBodyFile);
 
             Product product = GetProduct(productName);
@@ -525,8 +523,8 @@ namespace APSIM.Registration.Pages
         /// <param name="licenceType">License type.</param>
         private Attachment CreateLicenseFileAttachment(LicenceType licenceType)
         {
-            bool commercial = licenceType == LicenceType.Commercial;
-            string licenceFileName = commercial ? commercialLicencePdf : nonCommercialLicencePdf;
+            bool commercial = licenceType == LicenceType.SpecialUse;
+            string licenceFileName = commercial ? specialUseLicencePdf : generalUseLicencePdf;
             Stream licenseStream = GetResourceStream(licenceFileName);
             Attachment attachment = new Attachment(licenseStream, new ContentType(pdfMimeType));
             attachment.ContentDisposition.FileName = licenseAttachmentDisplayName;
@@ -733,10 +731,10 @@ namespace APSIM.Registration.Pages
         /// <param name="licenseType">Type of license.</param>
         private string GetRegistrationEmailSubject(LicenceType licenseType)
         {
-            if (licenseType == LicenceType.Commercial)
-                return "APSIM Software Commercial Licence";
+            if (licenseType == LicenceType.SpecialUse)
+                return "APSIM Software Special Use Licence";
 
-            return "APSIM Software Non-Commercial Licence";
+            return "APSIM Software General Use Licence";
         }
     }
 }

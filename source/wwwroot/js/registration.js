@@ -1,7 +1,7 @@
 const apsimName = "APSIM Next Generation";
 const oldApsimName = "APSIM Classic";
-const commercialLicenceName = "Commercial";
-const nonCommercialLicenceName = "Non-Commercial";
+const specialUseLicenceName = "Special Use";
+const generalUseLicenceName = "General Use";
 
 $(document).ready(function () {
     $('#dropDownLicenseType').change(onLicenseTypeChanged);
@@ -69,10 +69,10 @@ function updateLicense() {
     var src = '';
     if (product == apsimName || product == oldApsimName) {
         var licenceType = $('#dropDownLicenseType').find('option:selected').text()
-        if (licenceType == nonCommercialLicenceName)
-            src = 'APSIM_NonCommercial_RD_licence.htm';
+        if (licenceType == generalUseLicenceName)
+            src = 'APSIM_General_Use_Licence.htm';
         else {
-            src = 'APSIM_Commercial_Licence.htm';
+            src = 'APSIM_Special_Use_Licence.htm';
         }
     } else {
         src = 'OtherDisclaimer.html';

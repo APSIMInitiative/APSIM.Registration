@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using static Microsoft.EntityFrameworkCore.Internal.AsyncLock;
 
 namespace APSIM.Registration.Pages
 {
@@ -370,16 +371,17 @@ namespace APSIM.Registration.Pages
             // if (n <= 0 || !string.IsNullOrEmpty(versionFilter))
             //     n = 1000; // fixme
 
-            List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"{buildsApi}/api/oldapsim/list");
-
-            // fixme - we need to upload all of the legacy installers to apsim.info but need
-            // more disk space to do so. In the meantime I've uploaded the versions where
-            // we incremented the version number.
-            //int[] versionsToKeep = new[] { 402, 700, 1017, 1388, 2287, 3009, 3377, 3616, 3868, 4047, 4159 };
-            upgrades = upgrades.Where(u => u.BuiltOnJenkins).ToList();
+            var resultAsync = WebUtilities.PostAsync<List<BuildJob>>($"{buildsApi}/api/oldapsim/list");
+            resultAsync.Wait();
+            var upgrades = resultAsync.Result;
 
             // fixme - start time is not the same as merge time!
-            List<ProductVersion> result = upgrades.Select(u => new ProductVersion(u.Description, u.VersionString, u.IssueURL, u.StartTime, u.WindowsInstallerURL, u.LinuxBinariesURL, null)).ToList();
+            List<ProductVersion> result = upgrades.Select(u => new ProductVersion(u.Title, 
+                                                                                  $"Apsim7.10-r{u.RevisionNumber}", 
+                                                                                  $"https://github.com/APSIMInitiative/APSIMClassic/issues/{u.BugID}", 
+                                                                                  u.StartTime, 
+                                                                                  $"https://registration.apsim.info/?product=APSIM%20Classic&version=Apsim7.10-r{u.RevisionNumber}&platform=Windows", 
+                                                                                  null, null)).ToList();
             result.AddRange(GetStaticApsimClassicVersions());
             // if (result.Count > n)
             //     result = result.Take(n).ToList();

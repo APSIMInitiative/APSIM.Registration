@@ -370,7 +370,7 @@ namespace APSIM.Registration.Pages
             // if (n <= 0 || !string.IsNullOrEmpty(versionFilter))
             //     n = 1000; // fixme
 
-            List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"https://apsimdev.apsim.info/APSIM.Builds.Service/BuildsClassic.svc/GetReleases?numRows=100000");
+            List<BuildJob> upgrades = WebUtilities.CallRESTService<List<BuildJob>>($"{buildsApi}/api/oldapsim/list");
 
             // fixme - we need to upload all of the legacy installers to apsim.info but need
             // more disk space to do so. In the meantime I've uploaded the versions where

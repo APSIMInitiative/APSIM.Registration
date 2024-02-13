@@ -380,7 +380,7 @@ namespace APSIM.Registration.Pages
                                                                                   $"Apsim7.10-r{u.RevisionNumber}", 
                                                                                   $"https://github.com/APSIMInitiative/APSIMClassic/issues/{u.BugID}", 
                                                                                   u.StartTime, 
-                                                                                  $"https://registration.apsim.info/?product=APSIM%20Classic&version=Apsim7.10-r{u.RevisionNumber}&platform=Windows", 
+                                                                                  $"https://apsimdev.apsim.info/APSIMClassicFiles/Apsim7.10-r{u.RevisionNumber}.ApsimSetup.exe", 
                                                                                   null, null)).ToList();
             result.AddRange(GetStaticApsimClassicVersions());
             // if (result.Count > n)

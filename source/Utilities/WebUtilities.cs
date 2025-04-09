@@ -21,35 +21,6 @@ namespace APSIM.Registration.Utilities
             PropertyNameCaseInsensitive = true,
         };
 
-        /// <summary>Call REST web service.</summary>
-        /// <typeparam name="T">The return type</typeparam>
-        /// <param name="url">The URL of the REST service.</param>
-        /// <returns>The return data</returns>
-        public static T CallRESTService<T>(string url)
-        {
-            WebRequest wrGETURL;
-            wrGETURL = WebRequest.Create(url);
-            wrGETURL.Method = "GET";
-            wrGETURL.ContentType = @"application/xml; charset=utf-8";
-            wrGETURL.ContentLength = 0;
-            using (HttpWebResponse webresponse = wrGETURL.GetResponse() as HttpWebResponse)
-            {
-                Encoding enc = System.Text.Encoding.GetEncoding("utf-8");
-                // read response stream from response object
-                using (StreamReader loResponseStream = new StreamReader(webresponse.GetResponseStream(), enc))
-                {
-                    string st = loResponseStream.ReadToEnd();
-                    if (typeof(T).Name == "Object")
-                        return default(T);
-
-                    XmlSerializer serializer = new XmlSerializer(typeof(T));
-
-                    //ResponseData responseData;
-                    return (T)serializer.Deserialize(new NamespaceIgnorantXmlTextReader(new StringReader(st)));
-                }
-            }
-        }
-
         /// <summary>
         /// Make a POST request to a REST web API.
         /// </summary>

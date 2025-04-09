@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/source/bin/Debug/net5.0/APSIM.Registration.dll",
+            "program": "${workspaceFolder}/source/bin/Debug/net8.0/APSIM.Registration.dll",
             "args": [],
             "cwd": "${workspaceFolder}/source",
             "stopAtEntry": false,

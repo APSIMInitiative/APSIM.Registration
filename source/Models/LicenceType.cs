@@ -5,9 +5,12 @@ namespace APSIM.Registration.Models
     public enum LicenceType
     {
         [Display(Name = "General Use")]
-        GeneralUse,
+        GeneralUse = 0,
 
         [Display(Name = "Special Use")]
-        SpecialUse
+        SpecialUse = 1,
+        NonCommercial = 1
+
+
     }
 }

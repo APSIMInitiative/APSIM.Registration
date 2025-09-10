@@ -38,7 +38,7 @@ namespace APSIM.Registration.Pages
         private const string referencingGuideFileName = "referencing-guide.pdf";
         private const string referencingGuideAttachmentDisplayName = "Guide to Referencing APSIM in Publications.pdf";
         private const string specialUseLicencePdf = "APSIM_Special_Use_Licence.pdf";
-        private const string generalUseLicencePdf = "APSIM_General_Use_licence.pdf";
+        private const string generalUseLicencePdf = "APSIM_General_Use_Licence.pdf";
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
         private const string emailCookieName = "Email";
         public IReadOnlyList<Organisation> AiMembers { get; private init; }

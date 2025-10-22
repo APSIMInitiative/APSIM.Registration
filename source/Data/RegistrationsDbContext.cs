@@ -36,11 +36,15 @@ namespace APSIM.Registration.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Allow the LicenceType enum to be stored/read as a string.
-            var converter = new EnumToStringConverter<LicenceType>();
             modelBuilder
                 .Entity<Models.Registration>()
                 .Property(r => r.LicenceType)
-                .HasConversion(converter);
+                .HasConversion(
+                    //from Enum to string
+                    v => v.ToString(),
+                    //from string to Enum
+                    v => EnumExtensions.ParseCustomEnum<LicenceType>(v)
+                );
         }
     }
 }

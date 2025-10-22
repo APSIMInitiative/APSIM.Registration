@@ -38,7 +38,7 @@ namespace APSIM.Registration.Pages
         private const string referencingGuideFileName = "referencing-guide.pdf";
         private const string referencingGuideAttachmentDisplayName = "Guide to Referencing APSIM in Publications.pdf";
         private const string specialUseLicencePdf = "APSIM_Special_Use_Licence.pdf";
-        private const string generalUseLicencePdf = "APSIM_General_Use_licence.pdf";
+        private const string generalUseLicencePdf = "APSIM_General_Use_Licence.pdf";
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
         private const string emailCookieName = "Email";
         public IReadOnlyList<Organisation> AiMembers { get; private init; }
@@ -213,7 +213,9 @@ namespace APSIM.Registration.Pages
                 return LandingPage();
 
             // If controller is registered, show the downloads page.
-            if (controller.IsRegistered(email).Value)
+            bool isUserRegistered = controller.IsRegistered(email).Value;
+            logger.LogInformation($"User registration status for {email}: {isUserRegistered}");
+            if (isUserRegistered)
             {
                 // If product, version, or platform have not been provided,
                 // just show the downloads page.
@@ -257,6 +259,7 @@ namespace APSIM.Registration.Pages
             // If we get to this point, an email address has been provided,
             // but there is no registration associated with the email in the DB.
             // Therefore we need to show the registration form.
+            logger.LogInformation($"Unable to find registration for email {email}. Showing registration form.");
             return RegistrationForm(email);
         }
 
@@ -484,7 +487,7 @@ namespace APSIM.Registration.Pages
             }
             catch (Exception error)
             {
-                throw new Exception("Encounterd an error while attempting to generate email.", error);
+                throw new Exception("Encountered an error while attempting to generate email.", error);
             }
         }
 

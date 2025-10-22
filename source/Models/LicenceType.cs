@@ -6,12 +6,12 @@ namespace APSIM.Registration.Models
     {
 
         [Display(Name = "General Use")]
-        GeneralUse = 0,
+        GeneralUse,
 
         [Display(Name = "Special Use")]
-        SpecialUse = 1,
+        SpecialUse,
 
         [Display(Name = "Non-Commercial")]
-        NonCommercial = 2
+        NonCommercial,
     }
 }

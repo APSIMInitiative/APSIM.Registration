@@ -432,8 +432,7 @@ namespace APSIM.Registration.Pages
         {
             var email = new TransactionalEmailBuilder()
                 // Change back to this once we have proper email sending set up with MailJet.
-                // .WithFrom(new SendContact("no-reply@www.apsim.info"))
-                .WithFrom(new SendContact("apsiminitiative@gmail.com"))
+                .WithFrom(new SendContact("no-reply@www.apsim.info"))
                 .WithSubject("APSIM Special Use Registration Notification")
 #if DEBUG
                 .WithTo(new SendContact("julian.rich@csiro.au")) // debug
@@ -477,7 +476,7 @@ namespace APSIM.Registration.Pages
             {
                 TransactionalEmailBuilder email = new TransactionalEmailBuilder()
                 // email.IsBodyHtml = true;
-                    .WithFrom(new SendContact("apsiminitiative@gmail.com"))
+                    .WithFrom(new SendContact("no-reply@www.apsim.info"))
                     .WithTo(new SendContact(RegistrationDetails.Email))
                     .WithSubject(GetRegistrationEmailSubject(RegistrationDetails.LicenceType))
                     .WithHtmlPart(await GetEmailBody(RegistrationDetails.LicenceType, RegistrationDetails.Product, RegistrationDetails.Version, RegistrationDetails.Platform));

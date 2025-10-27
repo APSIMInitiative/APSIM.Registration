@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
-using System.Net.Mime;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +9,8 @@ using APSIM.Registration.Controllers;
 using APSIM.Registration.Data;
 using APSIM.Registration.Models;
 using APSIM.Registration.Utilities;
+using Mailjet.Client;
+using Mailjet.Client.TransactionalEmails;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -431,38 +430,41 @@ namespace APSIM.Registration.Pages
         /// </summary>
         private async Task SendInvoiceEmail()
         {
-            MailMessage email = new MailMessage();
-            email.From = new MailAddress("no-reply@www.apsim.info");
+            var email = new TransactionalEmailBuilder()
+                // Change back to this once we have proper email sending set up with MailJet.
+                .WithFrom(new SendContact("no-reply@www.apsim.info"))
+                .WithSubject("APSIM Special Use Registration Notification")
 #if DEBUG
-            email.To.Add("drew.holzworth@csiro.au"); // debug
+                .WithTo(new SendContact("julian.rich@csiro.au")) // debug
 #else
-            email.To.Add("apsim@csiro.au"); // prod
+            .WithTo(new SendContact("apsim@csiro.au")) // prod
 #endif
-            email.Subject = "APSIM Special Use Registration Notification";
-            email.IsBodyHtml = true;
+                .WithBcc(new SendContact("APSIM@csiro.au"))
+                .WithSubject("APSIM Special Use Registration Notification");
 
-            StringBuilder body = new StringBuilder();
-            body.AppendLine("<p>This is an automated notification of an APSIM Special Use license agreement.<p>");
-            body.AppendLine("<table>");
-            body.AppendLine($"<tr><td>Product</td><td>{RegistrationDetails.Product}</td>");
-            body.AppendLine($"<tr><td>Version</td><td>{RegistrationDetails.Version}</td>");
-            body.AppendLine($"<tr><td>First name</td><td>{RegistrationDetails.FirstName}</td>");
-            body.AppendLine($"<tr><td>Last name</td><td>{RegistrationDetails.LastName}</td>");
-            body.AppendLine($"<tr><td>Organisation</td><td>{RegistrationDetails.Organisation}</td>");
-            body.AppendLine($"<tr><td>Country</td><td>{RegistrationDetails.Country}</td>");
-            body.AppendLine($"<tr><td>Email</td><td>{RegistrationDetails.Email}</td>");
-            body.AppendLine($"<tr><td>Licence type</td><td>{RegistrationDetails.LicenceType}</td>");
-            body.AppendLine($"<tr><td>Licensor name</td><td>{RegistrationDetails.LicensorName}</td>");
-            body.AppendLine($"<tr><td>Licensor email</td><td>{RegistrationDetails.LicensorEmail}</td>");
-            body.AppendLine($"<tr><td>Contractor turnover</td><td>{RegistrationDetails.CompanyTurnover}</td>");
-            body.AppendLine($"<tr><td>Company registration number</td><td>{RegistrationDetails.CompanyRego}</td>");
-            body.AppendLine($"<tr><td>Company Address</td><td>{RegistrationDetails.CompanyAddress}</td>");
-            body.AppendLine("</table>");
+                StringBuilder body = new StringBuilder();
+                body.AppendLine("<p>This is an automated notification of an APSIM Special Use license agreement.<p>");
+                body.AppendLine("<table>");
+                body.AppendLine($"<tr><td>Product</td><td>{RegistrationDetails.Product}</td>");
+                body.AppendLine($"<tr><td>Version</td><td>{RegistrationDetails.Version}</td>");
+                body.AppendLine($"<tr><td>First name</td><td>{RegistrationDetails.FirstName}</td>");
+                body.AppendLine($"<tr><td>Last name</td><td>{RegistrationDetails.LastName}</td>");
+                body.AppendLine($"<tr><td>Organisation</td><td>{RegistrationDetails.Organisation}</td>");
+                body.AppendLine($"<tr><td>Country</td><td>{RegistrationDetails.Country}</td>");
+                body.AppendLine($"<tr><td>Email</td><td>{RegistrationDetails.Email}</td>");
+                body.AppendLine($"<tr><td>Licence type</td><td>{RegistrationDetails.LicenceType}</td>");
+                body.AppendLine($"<tr><td>Licensor name</td><td>{RegistrationDetails.LicensorName}</td>");
+                body.AppendLine($"<tr><td>Licensor email</td><td>{RegistrationDetails.LicensorEmail}</td>");
+                body.AppendLine($"<tr><td>Contractor turnover</td><td>{RegistrationDetails.CompanyTurnover}</td>");
+                body.AppendLine($"<tr><td>Company registration number</td><td>{RegistrationDetails.CompanyRego}</td>");
+                body.AppendLine($"<tr><td>Company Address</td><td>{RegistrationDetails.CompanyAddress}</td>");
+                body.AppendLine("</table>");
 
-            email.Body = body.ToString();
+            email.WithHtmlPart(body.ToString());
+            var completedEmail = email.Build();
 
-            SmtpClient smtp = CreateMailClient();
-            await smtp.SendMailAsync(email);
+            MailjetClient smtp = CreateMailClient();
+            await smtp.SendTransactionalEmailAsync(completedEmail);
         }
 
         /// <summary>
@@ -472,18 +474,17 @@ namespace APSIM.Registration.Pages
         {
             try
             {
-                MailMessage email = new MailMessage();
-                email.IsBodyHtml = true;
-                email.From = new MailAddress(emailFromAddress);
-                email.To.Add(RegistrationDetails.Email);
-                email.Subject = GetRegistrationEmailSubject(RegistrationDetails.LicenceType);
-                email.Body = await GetEmailBody(RegistrationDetails.LicenceType, RegistrationDetails.Product, RegistrationDetails.Version, RegistrationDetails.Platform);
-
-                email.Attachments.Add(CreateLicenseFileAttachment(RegistrationDetails.LicenceType));
-                email.Attachments.Add(CreateReferencingGuideAttachment());
-
-                SmtpClient smtp = CreateMailClient();
-                await smtp.SendMailAsync(email);
+                TransactionalEmailBuilder email = new TransactionalEmailBuilder()
+                // email.IsBodyHtml = true;
+                    .WithFrom(new SendContact("no-reply@www.apsim.info"))
+                    .WithTo(new SendContact(RegistrationDetails.Email))
+                    .WithSubject(GetRegistrationEmailSubject(RegistrationDetails.LicenceType))
+                    .WithHtmlPart(await GetEmailBody(RegistrationDetails.LicenceType, RegistrationDetails.Product, RegistrationDetails.Version, RegistrationDetails.Platform));
+                    // email.Attachments.Add(CreateLicenseFileAttachment(RegistrationDetails.LicenceType));
+                    // email.Attachments.Add(CreateReferencingGuideAttachment());
+                var completedEmail = email.Build();
+                MailjetClient smtp = CreateMailClient();
+                await smtp.SendTransactionalEmailAsync(completedEmail);
             }
             catch (Exception error)
             {
@@ -510,30 +511,30 @@ namespace APSIM.Registration.Pages
             return body;
         }
 
-        /// <summary>
-        /// Create an email attachment containing the guide to referencing apsim in publications.
-        /// </summary>
-        private Attachment CreateReferencingGuideAttachment()
-        {
-            Stream referencingStream = GetResourceStream(referencingGuideFileName);
-            Attachment attachment = new Attachment(referencingStream, new ContentType(pdfMimeType));
-            attachment.ContentDisposition.FileName = referencingGuideAttachmentDisplayName;
-            return attachment;
-        }
+        // /// <summary>
+        // /// Create an email attachment containing the guide to referencing apsim in publications.
+        // /// </summary>
+        // private Attachment CreateReferencingGuideAttachment()
+        // {
+        //     Stream referencingStream = GetResourceStream(referencingGuideFileName);
+        //     Mailjet.Client.TransactionalEmails.Attachment attachment = new(referencingStream, new ContentType(pdfMimeType));
+        //     attachment.ContentDisposition.FileName = referencingGuideAttachmentDisplayName;
+        //     return attachment;
+        // }
 
-        /// <summary>
-        /// Create an email attachment containing the license file.
-        /// </summary>
-        /// <param name="licenceType">License type.</param>
-        private Attachment CreateLicenseFileAttachment(LicenceType licenceType)
-        {
-            bool commercial = licenceType == LicenceType.SpecialUse;
-            string licenceFileName = commercial ? specialUseLicencePdf : generalUseLicencePdf;
-            Stream licenseStream = GetResourceStream(licenceFileName);
-            Attachment attachment = new Attachment(licenseStream, new ContentType(pdfMimeType));
-            attachment.ContentDisposition.FileName = licenseAttachmentDisplayName;
-            return attachment;
-        }
+        // /// <summary>
+        // /// Create an email attachment containing the license file.
+        // /// </summary>
+        // /// <param name="licenceType">License type.</param>
+        // private Attachment CreateLicenseFileAttachment(LicenceType licenceType)
+        // {
+        //     bool commercial = licenceType == LicenceType.SpecialUse;
+        //     string licenceFileName = commercial ? specialUseLicencePdf : generalUseLicencePdf;
+        //     Stream licenseStream = GetResourceStream(licenceFileName);
+        //     Attachment attachment = new Attachment(licenseStream, new ContentType(pdfMimeType));
+        //     attachment.ContentDisposition.FileName = licenseAttachmentDisplayName;
+        //     return attachment;
+        // }
 
         /// <summary>
         /// Find a product with the given version name. Throw if not found.
@@ -703,18 +704,22 @@ namespace APSIM.Registration.Pages
         /// Create a mail client for our sendgrid account. Reads configuration
         /// settings from environment variables.
         /// </summary>
-        private SmtpClient CreateMailClient()
+        private MailjetClient CreateMailClient()
         {
-            string host = ReadEnvironmentVariable(smtpHostVariableName);
-            string user = ReadEnvironmentVariable(smtpUsernameVariableName);
-            string token = ReadEnvironmentVariable(smtpTokenVariableName);
-            string portNo = ReadEnvironmentVariable(smtpPortVariableName);
-            if (!int.TryParse(portNo, out int port))
-                throw new ArgumentException($"Unable to parse port number '{portNo}' as integer");
+            string apiKey = ReadEnvironmentVariable("MAILJET_API_KEY");
+            string apiSecret = ReadEnvironmentVariable("MAILJET_API_SECRET");
 
-            SmtpClient smtp = new SmtpClient(host, port);
-            smtp.Credentials = new NetworkCredential(user, token);
-            return smtp;
+            // if (!int.TryParse(portNo, out int port))
+            //     throw new ArgumentException($"Unable to parse port number '{portNo}' as integer");
+
+            // SmtpClient smtp = new SmtpClient(host, port);
+            // smtp.Credentials = new NetworkCredential(user, token);
+            // return smtp;
+
+            return new MailjetClient(apiKey, apiSecret);
+        
+
+
         }
 
         /// <summary>

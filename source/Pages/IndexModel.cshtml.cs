@@ -228,6 +228,7 @@ namespace APSIM.Registration.Pages
                         string.IsNullOrEmpty(version) &&
                         string.IsNullOrEmpty(platform))
                     {
+                        logger.LogInformation($"Attempting to show registration form for email {email}.");
                         return RegistrationForm(email);
                     }
 

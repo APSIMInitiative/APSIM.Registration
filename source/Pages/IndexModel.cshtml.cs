@@ -223,6 +223,7 @@ namespace APSIM.Registration.Pages
 
                     // If already registered and no product/version/platform
                     // the user likely wants to register
+                    logger.LogInformation($"Sender={Sender}");
                     if (Sender == View.Downloads &&
                         string.IsNullOrEmpty(product) &&
                         string.IsNullOrEmpty(version) &&

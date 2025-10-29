@@ -195,73 +195,81 @@ namespace APSIM.Registration.Pages
 
         public async Task<ActionResult> HandleRequest(string email, string product, string version, string platform)
         {
-            email = SaveToSession(email, emailCookieName);
-            if (!string.IsNullOrEmpty(version))
-                VersionFilter = version;
-            if (!string.IsNullOrEmpty(product))
-                ProductFilter = product;
-            else
-                ProductFilter = apsimName;
-
-            // If we're here from the registration form, perform the registration.
-            if (Sender == View.RegistrationForm)
-                return await OnPostSubmitAsync();
-
-            // If no email has been provided, go to landing page.
-            if (string.IsNullOrEmpty(email))
-                return LandingPage();
-
-            // If controller is registered, show the downloads page.
-            bool isUserRegistered = controller.IsRegistered(email).Value;
-            logger.LogInformation($"User registration status for {email}: {isUserRegistered}");
-            if (isUserRegistered)
+            try
             {
-                logger.LogInformation($"User {email} is registered. Showing downloads page/serving download.");
-                logger.LogInformation($"Request details: product={product}, version={version}, platform={platform}");
-                // If product, version, or platform have not been provided,
-                // just show the downloads page.
-                if (string.IsNullOrEmpty(version))
-                    return Downloads();
+                email = SaveToSession(email, emailCookieName);
+                if (!string.IsNullOrEmpty(version))
+                    VersionFilter = version;
+                if (!string.IsNullOrEmpty(product))
+                    ProductFilter = product;
+                else
+                    ProductFilter = apsimName;
 
-                if (string.IsNullOrEmpty(platform))
+                // If we're here from the registration form, perform the registration.
+                if (Sender == View.RegistrationForm)
+                    return await OnPostSubmitAsync();
+
+                // If no email has been provided, go to landing page.
+                if (string.IsNullOrEmpty(email))
+                    return LandingPage();
+
+                // If controller is registered, show the downloads page.
+                bool isUserRegistered = controller.IsRegistered(email).Value;
+                logger.LogInformation($"User registration status for {email}: {isUserRegistered}");
+                if (isUserRegistered)
                 {
-                    // User requested a specific product and version, but not
-                    // platform. We show the downloads table, filtered to show
-                    // only rows matching the given version filter.
+                    logger.LogInformation($"User {email} is registered. Showing downloads page/serving download.");
+                    logger.LogInformation($"Request details: product={product}, version={version}, platform={platform}");
+                    // If product, version, or platform have not been provided,
+                    // just show the downloads page.
+                    if (string.IsNullOrEmpty(version))
+                        return Downloads();
 
-                    return Downloads();
+                    if (string.IsNullOrEmpty(platform))
+                    {
+                        // User requested a specific product and version, but not
+                        // platform. We show the downloads table, filtered to show
+                        // only rows matching the given version filter.
+
+                        return Downloads();
+                    }
+
+                    // Attempt to find a matching product version. If nothing is found,
+                    // serve the downloads page and log a warning message (server-side).
+                    (Product actualProduct, ProductVersion productVersion) = GetProductVersion(version);
+                    if (productVersion == null)
+                    {
+                        logger.LogWarning($"Unable to serve {product} {version} - unknown product or version.");
+                        return Downloads();
+                    }
+
+                    // If a product, version, and platform have all been provided,
+                    // we can serve that file. First though, we attempt to register
+                    // an upgrade to the DB under the user's email address.
+                    try
+                    {
+                        await controller.UpgradeAsync(email, productVersion.Number, platform);
+                    }
+                    catch (Exception err)
+                    {
+                        logger.LogError(err, $"Failed to log an upgrade");
+                    }
+
+                    // Finally, serve the file.
+                    return Redirect(GetDownloadURL(productVersion, platform));
                 }
 
-                // Attempt to find a matching product version. If nothing is found,
-                // serve the downloads page and log a warning message (server-side).
-                (Product actualProduct, ProductVersion productVersion) = GetProductVersion(version);
-                if (productVersion == null)
-                {
-                    logger.LogWarning($"Unable to serve {product} {version} - unknown product or version.");
-                    return Downloads();
-                }
-
-                // If a product, version, and platform have all been provided,
-                // we can serve that file. First though, we attempt to register
-                // an upgrade to the DB under the user's email address.
-                try
-                {
-                    await controller.UpgradeAsync(email, productVersion.Number, platform);
-                }
-                catch (Exception err)
-                {
-                    logger.LogError(err, $"Failed to log an upgrade");
-                }
-
-                // Finally, serve the file.
-                return Redirect(GetDownloadURL(productVersion, platform));
+                // If we get to this point, an email address has been provided,
+                // but there is no registration associated with the email in the DB.
+                // Therefore we need to show the registration form.
+                logger.LogInformation($"Unable to find registration for email {email}. Showing registration form.");
+                return RegistrationForm(email);
             }
-
-            // If we get to this point, an email address has been provided,
-            // but there is no registration associated with the email in the DB.
-            // Therefore we need to show the registration form.
-            logger.LogInformation($"Unable to find registration for email {email}. Showing registration form.");
-            return RegistrationForm(email);
+            catch (Exception err)
+            {
+                logger.LogError(err, $"An error occurred while handling request");
+                throw;
+            }
         }
 
         /// <summary>
@@ -283,18 +291,18 @@ namespace APSIM.Registration.Pages
         /// </summary>
         public async Task<ActionResult> OnPostSubmitAsync()
         {
-            // Ensure registration details are valid.
-            if (!ModelState.IsValid)
-                return RegistrationForm(RegistrationDetails.Email);
-
-            // Registration details are valid. Store the user's email address in
-            // the session data for later retrieval.
-            HttpContext.Response.Cookies.Append(emailCookieName, RegistrationDetails.Email, cookieOptions);
-
             // Perform some administrative tasks. Any errors will be logged but
             // not displayed to the user, who just wants to see the downloads page.
             try
             {
+                // Ensure registration details are valid.
+                if (!ModelState.IsValid)
+                    return RegistrationForm(RegistrationDetails.Email);
+
+                // Registration details are valid. Store the user's email address in
+                // the session data for later retrieval.
+                HttpContext.Response.Cookies.Append(emailCookieName, RegistrationDetails.Email, cookieOptions);
+
                 // Write registration to DB.
                 logger.LogDebug($"Adding new registration to registrations DB...");
                 controller.Register(RegistrationDetails);

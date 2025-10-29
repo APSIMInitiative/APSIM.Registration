@@ -216,6 +216,8 @@ namespace APSIM.Registration.Pages
             logger.LogInformation($"User registration status for {email}: {isUserRegistered}");
             if (isUserRegistered)
             {
+                logger.LogInformation($"User {email} is registered. Showing downloads page/serving download.");
+                logger.LogInformation($"Request details: product={product}, version={version}, platform={platform}");
                 // If product, version, or platform have not been provided,
                 // just show the downloads page.
                 if (string.IsNullOrEmpty(version))

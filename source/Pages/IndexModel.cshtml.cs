@@ -220,19 +220,6 @@ namespace APSIM.Registration.Pages
                 {
                     logger.LogInformation($"User {email} is registered. Showing downloads page/serving download.");
                     logger.LogInformation($"Request details: product={product}, version={version}, platform={platform}");
-                    // // If product, version, or platform have not been provided,
-                    // // just show the downloads page.
-                    // if (string.IsNullOrEmpty(version))
-                    //     return Downloads();
-
-                    // if (string.IsNullOrEmpty(platform))
-                    // {
-                    //     // User requested a specific product and version, but not
-                    //     // platform. We show the downloads table, filtered to show
-                    //     // only rows matching the given version filter.
-
-                    //     return Downloads();
-                    // }
 
                     // If already registered and no product/version/platform
                     // the user likely wants to register
@@ -243,6 +230,21 @@ namespace APSIM.Registration.Pages
                     {
                         return RegistrationForm(email);
                     }
+
+                    // If product, version, or platform have not been provided,
+                    // just show the downloads page.
+                    if (string.IsNullOrEmpty(version))
+                        return Downloads();
+
+                    if (string.IsNullOrEmpty(platform))
+                    {
+                        // User requested a specific product and version, but not
+                        // platform. We show the downloads table, filtered to show
+                        // only rows matching the given version filter.
+
+                        return Downloads();
+                    }
+
 
                     // Attempt to find a matching product version. If nothing is found,
                     // serve the downloads page and log a warning message (server-side).

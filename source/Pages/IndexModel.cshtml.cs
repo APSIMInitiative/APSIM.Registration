@@ -221,17 +221,6 @@ namespace APSIM.Registration.Pages
                     logger.LogInformation($"User {email} is registered. Showing downloads page/serving download.");
                     logger.LogInformation($"Request details: product={product}, version={version}, platform={platform}");
 
-                    // If already registered and no product/version/platform
-                    // the user likely wants to register
-                    logger.LogInformation($"Sender={Sender}");
-                    if (Sender == View.Downloads &&
-                        string.IsNullOrEmpty(product) &&
-                        string.IsNullOrEmpty(version) &&
-                        string.IsNullOrEmpty(platform))
-                    {
-                        logger.LogInformation($"Attempting to show registration form for email {email}.");
-                        return RegistrationForm(email);
-                    }
 
                     // If product, version, or platform have not been provided,
                     // just show the downloads page.

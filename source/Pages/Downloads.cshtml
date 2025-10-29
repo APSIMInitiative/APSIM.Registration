@@ -1,4 +1,5 @@
 @namespace APSIM.Registration.Pages
+@using Mailjet.Client.Resources
 @using Models
 @addTagHelper *,Microsoft.AspNetCore.Mvc.TagHelpers
 @model IndexModel
@@ -12,7 +13,6 @@
         <script type="text/javascript" src="~/js/downloads.js"></script>
     </head>
     <body>
-        <input type="hidden" name="Sender" value="Downloads">
         <h1>APSIM Downloads</h1>
         <p>
             Product: 
@@ -39,16 +39,16 @@
                             <td><a asp-page="Index" asp-route-version="@version.Number" asp-route-product="@product.Name">@version.Number</a></td>
                             <td><a href="@version.InfoLink">@version.Description</a></td>
                             <td>
-                                <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Windows">Windows</a>
+                                <a asp-page="Index" asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Windows">Windows</a>
                                 @if (!string.IsNullOrEmpty(version.DownloadLinkMac))
                                 {
                                     @:,&nbsp;
-                                    <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="MacOS">MacOS</a>
+                                    <a asp-page="Index" asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="MacOS">MacOS</a>
                                 }
                                 @if (!string.IsNullOrEmpty(version.DownloadLinkLinux))
                                 {
                                     @:,&nbsp;
-                                    <a asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Linux">Linux</a>
+                                    <a asp-page="Index" asp-route-product="@product.Name" asp-route-version="@version.Number" asp-route-platform="Linux">Linux</a>
                                 }
                             </td>
                         </tr>
@@ -65,7 +65,7 @@
                 <li>MacOS/Linux - Additional steps are required to complete installation. Please refer to <a href="https://apsimnextgeneration.netlify.app/install/">this page</a> for installation instructions.</li>
             </ul>
             <p>
-                You currently have a General Use license for APSIM. If you are using APSIM commercially, you will need to <a asp-page="Register">register again</a>.
+                You currently have a General Use license for APSIM. If you are using APSIM commercially, you will need to <a href="/register">register again</a>.
             </p>
         </footer>
     </body>

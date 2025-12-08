@@ -31,7 +31,7 @@ namespace APSIM.Registration.Pages
         private const string smtpTokenVariableName = "SMTP_TOKEN";
         private const string pdfMimeType = "application/pdf";
         private const string versionNameLatest = "Latest";
-        private const string emailFromAddress = "no-reply@www.apsim.info";
+        private const string emailFromAddress = "no-reply@apsim.info";
         private const string specialUseEmailBody = "EmailBodyCommercial.html";
         private const string generalUseEmailBody = "EmailBody.html";
         private const string referencingGuideFileName = "referencing-guide.pdf";

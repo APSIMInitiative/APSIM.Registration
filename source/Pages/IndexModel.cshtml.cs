@@ -31,7 +31,7 @@ namespace APSIM.Registration.Pages
         private const string smtpTokenVariableName = "SMTP_TOKEN";
         private const string pdfMimeType = "application/pdf";
         private const string versionNameLatest = "Latest";
-        private const string emailFromAddress = "no-reply@www.apsim.info";
+        private const string emailFromAddress = "no-reply@apsim.info";
         private const string specialUseEmailBody = "EmailBodyCommercial.html";
         private const string generalUseEmailBody = "EmailBody.html";
         private const string referencingGuideFileName = "referencing-guide.pdf";
@@ -394,7 +394,7 @@ namespace APSIM.Registration.Pages
                                                                                   $"Apsim7.10-r{u.RevisionNumber}", 
                                                                                   $"https://github.com/APSIMInitiative/APSIMClassic/issues/{u.BugID}", 
                                                                                   u.StartTime, 
-                                                                                  $"https://apsimdev.apsim.info/APSIMClassicFiles/Apsim7.10-r{u.RevisionNumber}.ApsimSetup.exe", 
+                                                                                  $"https://builds.apsim.info/api/oldapsim/download/{u.RevisionNumber}", 
                                                                                   null, null)).ToList();
             result.AddRange(GetStaticApsimClassicVersions());
             // if (result.Count > n)
@@ -411,18 +411,18 @@ namespace APSIM.Registration.Pages
         /// </summary>
         private static IEnumerable<ProductVersion> GetStaticApsimClassicVersions()
         {
-            string filesUrl = "https://apsimdev.apsim.info/APSIMClassicFiles/";
-            yield return new ProductVersion("APSIM 7.10", "Apsim7.10-r4159", "", new DateTime(2018, 4, 1), filesUrl + "Apsim7.10-r4159.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.9", "Apsim7.9-r4047", "", new DateTime(2017, 6, 14), filesUrl + "Apsim7.9-r4047.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.8", "Apsim7.8-r3868", "", new DateTime(2016, 3, 29), filesUrl + "Apsim7.8-r3868.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.7", "Apsim7.7-r3616", "", new DateTime(2014, 12, 16), filesUrl + "Apsim7.7-r3616.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.6", "Apsim7.6-r3377", "", new DateTime(2014, 3, 24), filesUrl + "Apsim7.6-r3377.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.5", "Apsim7.5-r3009", "", new DateTime(2013, 4, 15), filesUrl + "Apsim7.5-r3009.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.4", "Apsim7.4-r2287", "", new DateTime(2012, 2, 13), filesUrl + "Apsim7.4-r2287.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.3", "Apsim7.3-r1388", "", new DateTime(2011, 2, 27), filesUrl + "Apsim7.3-r1388.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.2", "Apsim7.2-r1017", "", new DateTime(2010, 8, 23), filesUrl + "Apsim7.2-r1017.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.1", "Apsim7.1-r700", "", new DateTime(2009, 11, 14), filesUrl + "Apsim7.1-r700.ApsimSetup.exe", null, null);
-            yield return new ProductVersion("APSIM 7.0", "Apsim7.0-r402", "", new DateTime(2009, 4, 26), filesUrl + "Apsim7.0-r402.ApsimSetup.exe", null, null);
+            string filesUrl = "https://builds.apsim.info/api/oldapsim/download/";
+            yield return new ProductVersion("APSIM 7.10", "Apsim7.10-r4159", "", new DateTime(2018, 4, 1), filesUrl + "4159", null, null);
+            yield return new ProductVersion("APSIM 7.9", "Apsim7.9-r4047", "", new DateTime(2017, 6, 14), filesUrl + "4047", null, null);
+            yield return new ProductVersion("APSIM 7.8", "Apsim7.8-r3868", "", new DateTime(2016, 3, 29), filesUrl + "3868", null, null);
+            yield return new ProductVersion("APSIM 7.7", "Apsim7.7-r3616", "", new DateTime(2014, 12, 16), filesUrl + "3616", null, null);
+            yield return new ProductVersion("APSIM 7.6", "Apsim7.6-r3377", "", new DateTime(2014, 3, 24), filesUrl + "3377", null, null);
+            yield return new ProductVersion("APSIM 7.5", "Apsim7.5-r3009", "", new DateTime(2013, 4, 15), filesUrl + "3009", null, null);
+            yield return new ProductVersion("APSIM 7.4", "Apsim7.4-r2287", "", new DateTime(2012, 2, 13), filesUrl + "2287", null, null);
+            yield return new ProductVersion("APSIM 7.3", "Apsim7.3-r1388", "", new DateTime(2011, 2, 27), filesUrl + "1388", null, null);
+            yield return new ProductVersion("APSIM 7.2", "Apsim7.2-r1017", "", new DateTime(2010, 8, 23), filesUrl + "1017", null, null);
+            yield return new ProductVersion("APSIM 7.1", "Apsim7.1-r700", "", new DateTime(2009, 11, 14), filesUrl + "700", null, null);
+            yield return new ProductVersion("APSIM 7.0", "Apsim7.0-r402", "", new DateTime(2009, 4, 26), filesUrl + "402", null, null);
             yield return new ProductVersion("APSIM 6.1", "Apsim6.1", "", new DateTime(2008, 5, 15), filesUrl + "Apsim6.1Setup.exe", null, null);
             yield return new ProductVersion("APSIM 6.0", "Apsim6.0", "", new DateTime(2008, 3, 27), filesUrl + "Apsim6.0Setup.exe", null, null);
         }

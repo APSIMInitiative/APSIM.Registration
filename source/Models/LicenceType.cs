@@ -11,7 +11,10 @@ namespace APSIM.Registration.Models
         [Display(Name = "Special Use")]
         SpecialUse,
 
-        [Display(Name = "Non-Commercial")]
+        [Display(Name = "Non-Commercial (Do not use)")]
         NonCommercial,
+
+        [Display(Name = "Commercial (Do not use)")]
+        Commercial
     }
 }

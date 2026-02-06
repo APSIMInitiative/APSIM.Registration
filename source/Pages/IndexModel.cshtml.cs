@@ -474,8 +474,15 @@ namespace APSIM.Registration.Pages
                 msg.AddBcc(new EmailAddress(bccEmailAddress));
                 msg.AddBcc(new EmailAddress(apsimEmail));
                 var response = await client.SendEmailAsync(msg);
-
-                logger.LogInformation($"Sent invoice email to {RegistrationDetails.Email}, {bccEmailAddress}, and {apsimEmail}");
+                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                    response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    logger.LogWarning($"Failed to send invoice email. Status code: {response.StatusCode}");
+                }
+                else
+                {
+                    logger.LogInformation($"Sent invoice email to {RegistrationDetails.Email}, {bccEmailAddress}, and {apsimEmail}");
+                }
             }
             catch (Exception e)
             {
@@ -498,7 +505,15 @@ namespace APSIM.Registration.Pages
                 var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
                 msg.AddBcc(new EmailAddress(bccEmailAddress));
                 var response = await client.SendEmailAsync(msg);
-                logger.LogInformation($"Sent registration email to {RegistrationDetails.Email}");
+                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                    response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    logger.LogWarning($"Failed to send registration email. Status code: {response.StatusCode}");
+                }
+                else
+                {
+                    logger.LogInformation($"Sent registration email to {RegistrationDetails.Email}");
+                }
             }
             catch (Exception error)
             {

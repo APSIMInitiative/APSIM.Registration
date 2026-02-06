@@ -9,12 +9,12 @@ using APSIM.Registration.Controllers;
 using APSIM.Registration.Data;
 using APSIM.Registration.Models;
 using APSIM.Registration.Utilities;
-using Mailjet.Client;
-using Mailjet.Client.TransactionalEmails;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace APSIM.Registration.Pages
 {
@@ -41,6 +41,7 @@ namespace APSIM.Registration.Pages
         private const string licenseAttachmentDisplayName = "APSIM License.pdf";
         private const string emailCookieName = "Email";
         private const string bccEmailAddress = "julian.rich@csiro.au";
+        private const string apsimEmail = "apsim@csiro.au";
         public IReadOnlyList<Organisation> AiMembers { get; private init; }
 
         static IndexModel()
@@ -446,38 +447,42 @@ namespace APSIM.Registration.Pages
         {
             try
             {
-                var email = new TransactionalEmailBuilder()
-                    // Change back to this once we have proper email sending set up with MailJet.
-                    .WithFrom(new SendContact(emailFromAddress))
-                    .WithSubject("APSIM Special Use Registration Notification")
-                    .WithTo(new SendContact("apsim@csiro.au")) // prod
-                    .WithBcc(new SendContact(bccEmailAddress))
-                    .WithSubject("APSIM Special Use Registration Notification");
+                StringBuilder body = new StringBuilder();
+                body.AppendLine("<p>This is an automated notification of an APSIM Special Use license agreement.<p>");
+                body.AppendLine("<table>");
+                body.AppendLine($"<tr><td>Product</td><td>{RegistrationDetails.Product}</td>");
+                body.AppendLine($"<tr><td>Version</td><td>{RegistrationDetails.Version}</td>");
+                body.AppendLine($"<tr><td>First name</td><td>{RegistrationDetails.FirstName}</td>");
+                body.AppendLine($"<tr><td>Last name</td><td>{RegistrationDetails.LastName}</td>");
+                body.AppendLine($"<tr><td>Organisation</td><td>{RegistrationDetails.Organisation}</td>");
+                body.AppendLine($"<tr><td>Country</td><td>{RegistrationDetails.Country}</td>");
+                body.AppendLine($"<tr><td>Email</td><td>{RegistrationDetails.Email}</td>");
+                body.AppendLine($"<tr><td>Licence type</td><td>{RegistrationDetails.LicenceType}</td>");
+                body.AppendLine($"<tr><td>Licensor name</td><td>{RegistrationDetails.LicensorName}</td>");
+                body.AppendLine($"<tr><td>Licensor email</td><td>{RegistrationDetails.LicensorEmail}</td>");
+                body.AppendLine($"<tr><td>Contractor turnover</td><td>{RegistrationDetails.CompanyTurnover}</td>");
+                body.AppendLine($"<tr><td>Company registration number</td><td>{RegistrationDetails.CompanyRego}</td>");
+                body.AppendLine($"<tr><td>Company Address</td><td>{RegistrationDetails.CompanyAddress}</td>");
+                body.AppendLine("</table>");
     
-                    StringBuilder body = new StringBuilder();
-                    body.AppendLine("<p>This is an automated notification of an APSIM Special Use license agreement.<p>");
-                    body.AppendLine("<table>");
-                    body.AppendLine($"<tr><td>Product</td><td>{RegistrationDetails.Product}</td>");
-                    body.AppendLine($"<tr><td>Version</td><td>{RegistrationDetails.Version}</td>");
-                    body.AppendLine($"<tr><td>First name</td><td>{RegistrationDetails.FirstName}</td>");
-                    body.AppendLine($"<tr><td>Last name</td><td>{RegistrationDetails.LastName}</td>");
-                    body.AppendLine($"<tr><td>Organisation</td><td>{RegistrationDetails.Organisation}</td>");
-                    body.AppendLine($"<tr><td>Country</td><td>{RegistrationDetails.Country}</td>");
-                    body.AppendLine($"<tr><td>Email</td><td>{RegistrationDetails.Email}</td>");
-                    body.AppendLine($"<tr><td>Licence type</td><td>{RegistrationDetails.LicenceType}</td>");
-                    body.AppendLine($"<tr><td>Licensor name</td><td>{RegistrationDetails.LicensorName}</td>");
-                    body.AppendLine($"<tr><td>Licensor email</td><td>{RegistrationDetails.LicensorEmail}</td>");
-                    body.AppendLine($"<tr><td>Contractor turnover</td><td>{RegistrationDetails.CompanyTurnover}</td>");
-                    body.AppendLine($"<tr><td>Company registration number</td><td>{RegistrationDetails.CompanyRego}</td>");
-                    body.AppendLine($"<tr><td>Company Address</td><td>{RegistrationDetails.CompanyAddress}</td>");
-                    body.AppendLine("</table>");
-    
-                email.WithHtmlPart(body.ToString());
-                var completedEmail = email.Build();
-    
-                MailjetClient smtp = CreateMailClient();
-                await smtp.SendTransactionalEmailAsync(completedEmail);
-                logger.LogInformation($"Sent invoice email to {RegistrationDetails.Email}");
+                var client = CreateMailClient();
+                var from = new EmailAddress(emailFromAddress, "APSIM Initiative");
+                var subject = "APSIM Special Use Registration Notification";
+                var to = new EmailAddress(RegistrationDetails.Email);
+                var htmlContent = body.ToString();
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
+                msg.AddBcc(new EmailAddress(bccEmailAddress));
+                msg.AddBcc(new EmailAddress(apsimEmail));
+                var response = await client.SendEmailAsync(msg);
+                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                    response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    logger.LogWarning($"Failed to send invoice email. Status code: {response.StatusCode}");
+                }
+                else
+                {
+                    logger.LogInformation($"Sent invoice email to {RegistrationDetails.Email}, {bccEmailAddress}, and {apsimEmail}");
+                }
             }
             catch (Exception e)
             {
@@ -492,19 +497,23 @@ namespace APSIM.Registration.Pages
         {
             try
             {
-                TransactionalEmailBuilder email = new TransactionalEmailBuilder()
-                // email.IsBodyHtml = true;
-                    .WithFrom(new SendContact(emailFromAddress))
-                    .WithTo(new SendContact(RegistrationDetails.Email))
-                    .WithBcc(new SendContact(bccEmailAddress))
-                    .WithSubject(GetRegistrationEmailSubject(RegistrationDetails.LicenceType))
-                    .WithHtmlPart(await GetEmailBody(RegistrationDetails.LicenceType, RegistrationDetails.Product, RegistrationDetails.Version, RegistrationDetails.Platform));
-                    // email.Attachments.Add(CreateLicenseFileAttachment(RegistrationDetails.LicenceType));
-                    // email.Attachments.Add(CreateReferencingGuideAttachment());
-                var completedEmail = email.Build();
-                MailjetClient smtp = CreateMailClient();
-                await smtp.SendTransactionalEmailAsync(completedEmail);
-                logger.LogInformation($"Sent registration email to {RegistrationDetails.Email}");
+                SendGridClient client = CreateMailClient();
+                var from = new EmailAddress(emailFromAddress, "APSIM Initiative");
+                var subject = GetRegistrationEmailSubject(RegistrationDetails.LicenceType);
+                var to = new EmailAddress(RegistrationDetails.Email);
+                var htmlContent = await GetEmailBody(RegistrationDetails.LicenceType, RegistrationDetails.Product, RegistrationDetails.Version, RegistrationDetails.Platform);
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, "", htmlContent);
+                msg.AddBcc(new EmailAddress(bccEmailAddress));
+                var response = await client.SendEmailAsync(msg);
+                if (response.StatusCode != System.Net.HttpStatusCode.Accepted &&
+                    response.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    logger.LogWarning($"Failed to send registration email. Status code: {response.StatusCode}");
+                }
+                else
+                {
+                    logger.LogInformation($"Sent registration email to {RegistrationDetails.Email}");
+                }
             }
             catch (Exception error)
             {
@@ -724,21 +733,10 @@ namespace APSIM.Registration.Pages
         /// Create a mail client for our sendgrid account. Reads configuration
         /// settings from environment variables.
         /// </summary>
-        private MailjetClient CreateMailClient()
+        private SendGridClient CreateMailClient()
         {
-            string apiKey = ReadEnvironmentVariable("MAILJET_API_KEY");
-            string apiSecret = ReadEnvironmentVariable("MAILJET_API_SECRET");
-
-            // if (!int.TryParse(portNo, out int port))
-            //     throw new ArgumentException($"Unable to parse port number '{portNo}' as integer");
-
-            // SmtpClient smtp = new SmtpClient(host, port);
-            // smtp.Credentials = new NetworkCredential(user, token);
-            // return smtp;
-            return new MailjetClient(apiKey, apiSecret);
-        
-
-
+            string apiKey = ReadEnvironmentVariable("SENDGRID_API_KEY");
+            return new SendGridClient(apiKey);
         }
 
         /// <summary>
